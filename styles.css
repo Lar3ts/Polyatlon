@@ -1,0 +1,225 @@
+/* =========================================
+   1. БАЗОВАЯ ВЁРСТКА (Flex-сетка)
+   ========================================= */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  /* Важно для мобильных: запрещаем горизонтальный зум страницы */
+  overflow-x: hidden; 
+}
+
+.topbar {
+  width: 100%;
+  background-color: #2c3e50;
+  padding: 10px 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+/* Карточка — ограничиваем максимальную ширину */
+.event-card-compact {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;       /* ← НОВОЕ: не даёт карточке растягаться на весь экран */
+  margin-left: auto;       /* ← центрируем */
+  margin-right: auto;
+}
+
+/* Баннер — taller на больших экранах */
+.banner-img-wrapper {
+  height: 160px;          /* ← чуть выше */
+  width: 100%;
+  position: relative;
+}
+.banner-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center; /* ← показываем центр картинки, а не край */
+  display: block;
+}
+
+/* ГЛАВНЫЙ КОНТЕЙНЕР: Flex-разделение на левую и правую части */
+.container-flex {
+  display: flex;
+  flex-direction: column; /* На мобильных — друг под другом */
+  min-height: 100vh;
+  margin-top: 60px; /* Отступ под фиксированный топбар */
+}
+
+@media (min-width: 768px) {
+  .container-flex {
+    flex-direction: row; /* На ПК — рядом */
+  }
+}
+
+/* ЛЕВАЯ КОЛОНКА (контент) */
+.main {
+  flex: 1;
+  padding: 20px;
+  box-sizing: border-box;
+  
+  /* КРИТИЧЕСКИ ВАЖНО для скролла таблицы: */
+  min-width: 0; /* Разрешает сжиматься уже контента (ломает баг flex) */
+  
+  /* Вертикальный скролл, если контента много */
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+/* ПРАВАЯ КОЛОНКА (если есть) */
+.sidebar {
+  flex: 0 0 300px;
+  padding: 20px;
+  box-sizing: border-box;
+  background: #f9f9f9;
+}
+
+
+/* =========================================
+   2. ВЫПАДАЮЩЕЕ МЕНЮ (только по клику)
+   ========================================= */
+.dropdown {
+  position: relative;
+  display: block;
+  margin-right: 15px;
+}
+
+.dropbtn {
+  background-color: #ccc;
+  border: none;
+  padding: 8px 12px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 4px;
+  color: #333;
+}
+
+.dropbtn:hover {
+  background-color: #bbb;
+}
+
+.dropdown-content {
+  display: none; /* Скрыто по умолчанию */
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  z-index: 9999; /* Выше всего остального */
+  top: 100%;     /* Сразу под кнопкой */
+  left: 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+/* Показываем меню, когда JS добавил класс .show */
+.dropdown.show .dropdown-content {
+  display: block !important;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 10px 15px;
+  text-decoration: none;
+  display: block;
+  font-size: 14px;
+}
+
+.dropdown-content a:hover {
+  background-color: #eee;
+  color: #2c3e50;
+}
+
+
+/* =========================================
+   3. ГОРИЗОНТАЛЬНЫЙ СКРОЛЛ ТАБЛИЦЫ (ГЛАВНОЕ)
+   ========================================= */
+
+/* Контейнер предпросмотра (убираем любые ограничения ширины) */
+#previewDropdown {
+  max-width: none !important; /* Убивает старые max-width */
+  width: 100% !important;
+  box-sizing: border-box;
+  overflow: visible !important; /* Не скроллим сам блок */
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+/* Обёртка, которая создает горизонтальный скролл */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto !important; /* ВКЛЮЧАЕТ СКРОЛЛ ВЛЕВО-ВПРАВО */
+  -webkit-overflow-scrolling: touch; /* Плавный свайп на iPhone */
+  display: block;
+  margin-bottom: 20px;
+  
+  /* Для отладки (можно удалить потом): красная рамка покажет границы блока */
+  border: 1px dashed #ff0000; 
+}
+
+/* Кастомная полоса прокрутки (чтобы точно было видно, где свайпать) */
+.table-wrapper::-webkit-scrollbar {
+  height: 10px;
+}
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #888; 
+  border-radius: 5px;
+}
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
+/* Сама таблица */
+.table-wrapper table {
+  /* Таблица хочет быть широкой, чтобы вызвать скролл на узких экранах */
+  min-width: 650px !important; 
+  width: 100%;
+  border-collapse: collapse;
+  display: block; /* Важно для расчета ширины */
+}
+
+/* Ячейки: запрещаем перенос текста, чтобы колонки не сплющивались */
+.table-wrapper th, 
+.table-wrapper td {
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  text-align: left;
+  white-space: nowrap !important; /* КРИТИЧНО: текст не переносится */
+  background-color: #fff;
+  vertical-align: middle;
+}
+
+/* Шапка таблицы: прилипает к верху при скролле */
+.table-wrapper thead th {
+  background-color: #f4f4f4;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Заголовки разделов внутри контейнера */
+#previewDropdown h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #333;
+}

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Архив протоколов</title>
+
+<style>
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #eef2f3;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .topbar {
+    width: 100%;
+    background-color: #2c3e50;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0; left: 0; z-index: 20;
+    box-sizing: border-box;
+    height: 60px;
+  }
+  .topbar-title { color: white; font-weight: bold; font-size: 1.1em; }
+
+  .desktop-menu { display: flex; gap: 4px; margin-left: 20px; }
+  .desktop-menu a {
+    color: #fff; text-decoration: none; padding: 8px 12px;
+    border-radius: 4px; font-size: 1em; font-family: inherit; transition: background 0.2s;
+  }
+  .desktop-menu a:hover { background-color: rgba(255,255,255,0.1); }
+
+  .burger-btn { display: none; background: none; border: none; cursor: pointer; padding: 8px; }
+  .burger-btn span { display: block; width: 22px; height: 2px; background-color: #fff; margin: 5px 0; transition: 0.3s; }
+
+  .mobile-dropdown {
+    position: absolute; top: 100%; right: 0; background-color: #2c3e50;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px;
+    overflow: hidden; min-width: 280px; display: none; flex-direction: column; z-index: 9998;
+  }
+  .mobile-dropdown.active { display: flex !important; }
+  .mobile-link-list a {
+    display: block; padding: 12px 16px; color: #fff; text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .mobile-link-list a:last-child { border-bottom: none; }
+  .mobile-link-list a:hover { background-color: rgba(255,255,255,0.1); }
+
+  @media (max-width: 768px) {
+    .burger-btn { display: block; }
+    .desktop-menu { display: none; }
+  }
+
+  .title-bar {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; padding: 8px 20px; margin-top: 60px;
+    background-color: #fff; border-bottom: 1px solid #ddd; box-sizing: border-box;
+  }
+  .title-bar-label { font-weight: bold; font-size: 1.1em; color: #2c3e50; white-space: nowrap; }
+
+  .content-wrapper {
+    max-width: 1440px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  .filters-container {
+    padding: 10px 20px; background-color: #fff;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;
+    border-bottom: 1px solid #eee; align-items: end;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-label { font-size: 0.75em; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.5px; }
+  select, input {
+    padding: 6px 10px; border: 1px solid #ccc; border-radius: 5px;
+    font-size: 0.85em; background-color: #f9f9f9; font-family: inherit;
+  }
+  select:focus, input:focus { outline: none; border-color: #3498db; background-color: #fff; }
+
+  .btn-reset {
+    background-color: #e74c3c; color: white; border: none;
+    padding: 6px 18px; border-radius: 5px; cursor: pointer; font-weight: bold;
+    white-space: nowrap; font-size: 0.85em; font-family: inherit;
+  }
+  .btn-reset:hover { background-color: #c0392b; }
+  @media (max-width: 768px) { .btn-reset { grid-column: 1 / -1; text-align: center; padding: 10px; } }
+
+  .main { margin-top: 0; padding: 20px; min-width: 0; box-sizing: border-box; }
+  h2 { margin-top: 0; color: #34495e; font-size: 1.15em; }
+
+  .stats-container { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; }
+  @media (min-width: 768px) { .stats-container { grid-template-columns: 1fr 1fr; } }
+
+  .stat-card {
+    background: #fff; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    padding: 14px; border-top: 4px solid #3498db;
+  }
+  .stat-card h3 { margin-top: 0; font-size: 1em; color: #2c3e50; }
+  .stat-list { list-style: none; padding: 0; margin: 8px 0 0 0; }
+  .stat-list li { padding: 5px 6px; border-bottom: 1px dashed #eee; font-size: 0.85em; color: #555; }
+  .stat-list li:last-child { border-bottom: none; }
+  .stat-list a { color: #3498db; text-decoration: none; font-weight: 600; }
+  .stat-list a:hover { text-decoration: underline; }
+
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+  }
+
+  /* 1100-1439: 6 колонок */
+  @media (max-width: 1439px) and (min-width: 1100px) {
+    .events-grid { grid-template-columns: repeat(6, 1fr); }
+  }
+
+  /* 769-1099: 4 колонки */
+  @media (max-width: 1099px) and (min-width: 769px) {
+    .events-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  /* 560-768: 3 колонки */
+  @media (max-width: 768px) and (min-width: 560px) {
+    .events-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* 390-559: 2 колонки */
+  @media (max-width: 559px) and (min-width: 390px) {
+    .events-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* до 389: 1 колонка */
+  @media (max-width: 389px) {
+    .events-grid { grid-template-columns: 1fr; }
+  }
+
+  .event-card-compact {
+    background-color: #fff; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    overflow: hidden; display: flex; flex-direction: column; min-width: 0;
+  }
+  .banner-img-wrapper { height: 110px; width: 100%; position: relative; }
+  .banner-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+  .banner-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    padding: 10px; box-sizing: border-box; color: white;
+  }
+  .banner-title { margin: 0; font-size: 0.95em; line-height: 1.3; }
+  .banner-title span { font-size: 0.75em; opacity: 0.9; display: block; margin-top: 3px; }
+  .event-details { padding: 10px; flex: 1; display: flex; flex-direction: column; }
+  .detail-box {
+    background-color: #f1f2f6; padding: 5px 7px; border-radius: 4px;
+    font-size: 0.78em; margin-bottom: 5px;
+  }
+  
+.buttons {
+  padding: 12px;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 8px;
+  /* Добавляем это, чтобы кнопки были одной высоты и текст сидел ровно */
+  align-items: stretch; 
+}
+
+a.btn-download, a.btn-view, button.btn-view {
+  flex: 1;
+  text-align: center;
+  /* Центрируем текст строго по вертикали */
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 40px; /* Фиксируем высоту, чтобы кнопки не прыгали */
+  padding: 0; /* Убираем внутренние отступы, они теперь не нужны */
+  background-color: #2980b9;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+/* Отдельные стили для разных кнопок */
+a.btn-download:hover { background-color: #3498db; }
+a.btn-view:hover, button.btn-view:hover { background-color: #2ecc71; }
+
+a.btn-view { background-color: #27ae60; }
+button.btn-view { background-color: #27ae60; border: none; }
+
+  .no-results {
+    display: none; grid-column: 1 / -1; text-align: center;
+    padding: 40px 20px; color: #555; font-size: 1.1em;
+    background-color: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .pagination-container {
+    margin-top: 25px; text-align: center; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap;
+  }
+  .pagination-container button {
+    padding: 6px 14px; border: 1px solid #ccc; border-radius: 5px;
+    background: #fff; cursor: pointer; font-family: inherit; font-size: 0.9em; transition: all 0.2s;
+  }
+  .pagination-container button:hover { background: #f0f0f0; }
+  .pagination-container button.active {
+    background: #2980b9; color: #fff; border-color: #2980b9;
+  }
+
+  #previewModal {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;
+  }
+  .modal-content {
+    background: white; width: 90%; max-width: 900px; height: 85vh;
+    border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .modal-header {
+    padding: 12px 18px; border-bottom: 1px solid #eee;
+    display: flex; justify-content: space-between; align-items: center; background: #f8f9fa;
+  }
+  .modal-title { margin: 0; font-size: 1.1em; color: #2c3e50; }
+  .close-btn { background: none; border: none; color: #999; font-size: 1.5em; cursor: pointer; }
+  .close-btn:hover { color: #000; }
+  .modal-body { padding: 18px; overflow-y: auto; flex: 1; }
+  .table-wrapper { margin-bottom: 25px; overflow-x: auto; }
+  .table-wrapper h4 {
+    margin-top: 0; margin-bottom: 10px; color: #2c3e50;
+    border-left: 4px solid #27ae60; padding-left: 10px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+  th { background-color: #f8f9fa; font-weight: bold; }
+  tr:hover { background-color: #f5f5f5; }
+
+  .loading { text-align: center; padding: 40px; color: #7f8c8d; font-size: 1.2em; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <span class="topbar-title">Архив протоколов</span>
+    <nav class="desktop-menu">
+      <a href="index.html">Главная</a>
+      <a href="reglament.html">Регламент</a>
+      <a href="athletes.html">Спортсмены</a>
+    </nav>
+    <button id="mobileMenuBtn" class="burger-btn" onclick="toggleMobileMenu()">
+      <span></span><span></span><span></span>
+    </button>
+    <div id="mobileDropdown" class="mobile-dropdown">
+      <div class="mobile-link-list">
+        <a href="index.html">Главная</a>
+        <a href="reglament.html">Регламент</a>
+        <a href="athletes.html">Спортсмены</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="title-bar">
+      <span class="title-bar-label">Архив протоколов</span>
+    </div>
+
+    <div class="filters-container">
+      <div class="filter-group">
+        <label class="filter-label">Год</label>
+        <select id="filter-year" onchange="applyFilters()">
+          <option value="">Все годы</option>
+          <option value="2027">2027</option>
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+          <option value="2020">2020</option>
+          <option value="2019">2019</option>
+          <option value="1995">1995</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Дисциплина</label>
+        <select id="filter-discipline" onchange="applyFilters()">
+          <option value="">Любая дисциплина</option>
+          <option value="3-борье с лыжной гонкой">3-борье с лыжной гонкой</option>
+          <option value="4-борье с лыжной гонкой">4-борье с лыжной гонкой</option>
+          <option value="3-борье с бегом">3-борье с бегом</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Возрастная группа</label>
+        <select id="filter-age" onchange="applyFilters()">
+          <option value="">Все группы</option>
+          <option value="Мужчины(Женщины)">Мужчины(Женщины)</option>
+          <option value="Юниоры(Юниорки) 18-20">Юниоры(Юниорки) 18-20</option>
+          <option value="Юноши(Девушки) 16-17">Юноши(Девушки) 16-17</option>
+          <option value="Юноши(Девушки) 14-15">Юноши(Девушки) 14-15</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Соревнования</label>
+        <select id="filter-event" onchange="applyFilters()">
+          <option value="">Любые соревнования</option>
+          <option value="Чемпионат России">Чемпионат России</option>
+          <option value="Первенство России">Первенство России</option>
+          <option value="Кубок России">Кубок России</option>
+        </select>
+      </div>
+      <button class="btn-reset" onclick="resetFilters()">Сбросить</button>
+    </div>
+
+    <div class="main">
+      <div class="stats-container">
+        <div class="stat-card">
+          <h3>Актуальное</h3>
+          <ul class="stat-list" id="recentList"></ul>
+        </div>
+        <div class="stat-card">
+          <h3>Рекомендуем</h3>
+          <ul class="stat-list" id="topViewedList"></ul>
+        </div>
+      </div>
+
+      <h2>Результаты поиска</h2>
+      <div class="events-grid" id="eventsGrid">
+        <div class="loading">Загрузка данных...</div>
+      </div>
+      <div class="no-results" id="noResults">
+        Ничего не найдено. Попробуйте изменить фильтры.
+      </div>
+      <div class="pagination-container" id="pagination"></div>
+    </div>
+  </div>
+
+  <div id="previewModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalTitle">Результаты</h4>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+<script>
+  var allEvents = [];
+  var filteredEvents = [];
+  var currentPage = 1;
+  var itemsPerPage = 12;
+
+  async function loadData() {
+    try {
+      var res = await fetch('events.json');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      allEvents = await res.json();
+      allEvents.sort(function(a, b) { return b.year - a.year; });
+      renderRecent();
+      renderTopViewed();
+      applyFilters();
+    } catch(e) {
+      document.getElementById('eventsGrid').innerHTML =
+        '<div class="no-results" style="display:block;">Ошибка загрузки events.json (' + e.message + ').<br>' +
+        'Если файл открыт локально (file://), нужен локальный сервер. <br>' +
+        'Запусти: <code>python -m http.server</code> в папке проекта и открой http://localhost:8000</div>';
+    }
+  }
+
+  function renderRecent() {
+    var list = document.getElementById('recentList');
+    list.innerHTML = '';
+    var recent = allEvents.slice(0, 4);
+    recent.forEach(function(e) {
+      var li = document.createElement('li');
+      li.innerHTML = '<a href="#" onclick="openModal(\'' + e.key + '\'); return false;">'
+        + e.title + ' — ' + (e.subtitle || '') + '</a>';
+      list.appendChild(li);
+    });
+  }
+
+  function renderTopViewed() {
+    var list = document.getElementById('topViewedList');
+    list.innerHTML = '';
+    var featured = allEvents.filter(function(e) { return e.featured === true; });
+    if (featured.length === 0) {
+      featured = allEvents.slice(4, 8);
+    }
+    featured.slice(0, 4).forEach(function(e) {
+      var li = document.createElement('li');
+      li.innerHTML = '<a href="#" onclick="openModal(\'' + e.key + '\'); return false;">'
+        + e.title + ' — ' + (e.subtitle || '') + '</a>';
+      list.appendChild(li);
+    });
+  }
+
+  function applyFilters() {
+    var fYear = document.getElementById('filter-year').value;
+    var fDisc = document.getElementById('filter-discipline').value;
+    var fAge  = document.getElementById('filter-age').value;
+    var fEvent = document.getElementById('filter-event').value;
+
+    filteredEvents = allEvents.filter(function(card) {
+      var matchYear = (fYear === '' || String(card.year) === fYear);
+      var matchDisc = (fDisc === '' || card.discipline === fDisc);
+      var matchEvent = (fEvent === '' || card.event === fEvent);
+
+      var matchAge = (fAge === '');
+      if (fAge !== '' && card.age) {
+        var ages = card.age.split(';').map(function(a) { return a.trim(); });
+        if (ages.indexOf(fAge) !== -1) matchAge = true;
+      }
+
+      return matchYear && matchDisc && matchAge && matchEvent;
+    });
+
+    filteredEvents.sort(function(a, b) { return b.year - a.year; });
+
+    currentPage = 1;
+    renderPage();
+  }
+
+  function renderPage() {
+    var grid = document.getElementById('eventsGrid');
+    var noResults = document.getElementById('noResults');
+    grid.innerHTML = '';
+
+    if (filteredEvents.length === 0) {
+      noResults.style.display = 'block';
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+    noResults.style.display = 'none';
+
+    var start = (currentPage - 1) * itemsPerPage;
+    var end = start + itemsPerPage;
+    var eventsToShow = filteredEvents.slice(start, end);
+
+    eventsToShow.forEach(function(e) {
+      var card = document.createElement('div');
+      card.className = 'event-card-compact';
+
+      var ageDisplay = (e.age || '').split(';').join(', ');
+      var imgSrc = e.img || 'files/placeholder.png';
+
+      card.innerHTML =
+        '<div class="banner-img-wrapper">' +
+          '<img src="' + imgSrc + '" alt="' + e.title + '" onerror="this.src=\'files/placeholder.png\'" />' +
+          '<div class="banner-overlay">' +
+            '<h3 class="banner-title">' + e.title + '<span>' + (e.subtitle || '') + '</span></h3>' +
+          '</div>' +
+        '</div>' +
+        '<div class="event-details">' +
+          '<div class="detail-box"><strong>Дисциплина:</strong> ' + (e.discipline || '-') + '</div>' +
+          '<div class="detail-box"><strong>Возрастные группы:</strong> ' + ageDisplay + '</div>' +
+        '</div>' +
+        '<div class="buttons">' +
+          '<a href="' + (e.pdf || '#') + '" download class="btn-download">Скачать</a>' +
+          '<button class="btn-view" onclick="openModal(\'' + e.key + '\')">БЫСТРЫЙ ПРОСМОТР</button>' +
+        '</div>';
+
+      grid.appendChild(card);
+    });
+
+    renderPagination();
+  }
+
+  function renderPagination() {
+    var totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
+    var container = document.getElementById('pagination');
+    container.innerHTML = '';
+
+    if (totalPages <= 1) return;
+
+    if (currentPage > 1) {
+      container.innerHTML += '<button onclick="changePage(' + (currentPage - 1) + ')">&#8592; Назад</button>';
+    }
+
+    for (var i = 1; i <= totalPages; i++) {
+      var activeClass = i === currentPage ? ' class="active"' : '';
+      container.innerHTML += '<button' + activeClass + ' onclick="changePage(' + i + ')">' + i + '</button>';
+    }
+
+    if (currentPage < totalPages) {
+      container.innerHTML += '<button onclick="changePage(' + (currentPage + 1) + ')">Вперёд &#8594;</button>';
+    }
+  }
+
+  function changePage(page) {
+    currentPage = page;
+    renderPage();
+    window.scrollTo({ top: document.querySelector('.main').offsetTop - 80, behavior: 'smooth' });
+  }
+
+  function resetFilters() {
+    document.getElementById('filter-year').value = '';
+    document.getElementById('filter-discipline').value = '';
+    document.getElementById('filter-age').value = '';
+    document.getElementById('filter-event').value = '';
+    applyFilters();
+  }
+
+  function buildTable(group, rows) {
+    var html = '<div class="table-wrapper"><h4>' + group + '</h4><table>';
+    html += '<thead><tr><th>Место</th><th>Имя Фамилия</th><th>Год рожд.</th><th>Страна</th><th>Стрельба</th><th>Силовая</th><th>Гонка</th><th>Сумма</th></tr></thead><tbody>';
+    if (rows) {
+      rows.forEach(function(r) {
+        html += '<tr><td>' + (r.p || '-') + '</td><td>' + (r.n || '-') + '</td><td>' + (r.y || '-') + '</td><td>' + (r.c || '-') + '</td><td>' + (r.s || '-') + '</td><td>' + (r.st || '-') + '</td><td>' + (r.r || '-') + '</td><td><strong>' + (r.t || '-') + '</strong></td></tr>';
+      });
+    }
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function openModal(key) {
+    var data = allEvents.find(function(e) { return e.key === key; });
+    if (!data) return;
+
+    document.getElementById('modalTitle').textContent = data.title + (data.subtitle ? ' — ' + data.subtitle : '');
+
+    var bodyHtml = '';
+    if (data.tables) {
+      data.tables.forEach(function(t) {
+        bodyHtml += buildTable(t.group, t.rows);
+      });
+    }
+    document.getElementById('modalBody').innerHTML = bodyHtml;
+    document.getElementById('previewModal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('previewModal').style.display = 'none';
+  }
+
+  window.onclick = function(event) {
+    var modal = document.getElementById('previewModal');
+    if (modal && event.target == modal) { modal.style.display = 'none'; }
+  }
+
+  function toggleMobileMenu() {
+    document.getElementById('mobileDropdown').classList.toggle('active');
+  }
+
+  document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('mobileDropdown');
+    var btn = document.getElementById('mobileMenuBtn');
+    if (!dropdown || !btn) return;
+    if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('active');
+    }
+  });
+
+  loadData();
+</script>
+</body>
+</html>
