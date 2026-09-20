@@ -6,20 +6,120 @@
   <title>Архив протоколов</title>
 
 <style>
+  /* ===== ТЕМА: СВЕТЛАЯ (по умолчанию) ===== */
+  :root {
+    --bg-body: #eef2f3;
+    --bg-card: #fff;
+    --bg-topbar: #2c3e50;
+    --bg-titlebar: #fff;
+    --bg-filters: #fff;
+    --bg-input: #f9f9f9;
+    --bg-input-focus: #fff;
+    --bg-detail: #f1f2f6;
+    --bg-modal-header: #f8f9fa;
+    --bg-th: #f8f9fa;
+    --bg-tr-hover: #f5f5f5;
+    --bg-pagination-hover: #f0f0f0;
+    --bg-mobile-dropdown: #2c3e50;
+
+    --text-primary: #2c3e50;
+    --text-secondary: #555;
+    --text-muted: #7f8c8d;
+    --text-detail: #2c3e50;
+    --text-label: #34495e;
+    --text-filter-label: #7f8c8d;
+    --text-topbar: #fff;
+    --text-link: #3498db;
+    --text-close: #999;
+    --text-close-hover: #000;
+
+    --border-color: #ddd;
+    --border-light: #eee;
+    --border-input: #ccc;
+    --border-tooltip: #2c3e50;
+
+    --shadow-card: 0 2px 6px rgba(0,0,0,0.08);
+    --shadow-modal: 0 2px 8px rgba(0,0,0,0.1);
+    --shadow-tooltip: 0 4px 16px rgba(0,0,0,0.3);
+    --shadow-dropdown: 0 4px 12px rgba(0,0,0,0.15);
+
+    --highlight-bg: #fff3cd;
+
+    --accent-blue: #3498db;
+    --accent-green: #27ae60;
+    --accent-green-hover: #2ecc71;
+    --accent-red: #e74c3c;
+    --accent-red-hover: #c0392b;
+    --btn-download: #2980b9;
+    --btn-download-hover: #3498db;
+    --pagination-active: #2980b9;
+  }
+
+  /* ===== ТЕМА: ТЁМНАЯ ===== */
+  [data-theme="dark"] {
+    --bg-body: #1a2332;
+    --bg-card: #243447;
+    --bg-topbar: #1a2332;
+    --bg-titlebar: #243447;
+    --bg-filters: #243447;
+    --bg-input: #1a2332;
+    --bg-input-focus: #2a3a4d;
+    --bg-detail: #2a3a4d;
+    --bg-modal-header: #1a2332;
+    --bg-th: #2a3a4d;
+    --bg-tr-hover: #2a3a4d;
+    --bg-pagination-hover: #2a3a4d;
+    --bg-mobile-dropdown: #1a2332;
+
+    --text-primary: #e0e6ed;
+    --text-secondary: #b0b8c4;
+    --text-muted: #8899aa;
+    --text-detail: #d0d8e0;
+    --text-label: #e0e6ed;
+    --text-filter-label: #8899aa;
+    --text-topbar: #e0e6ed;
+    --text-link: #5dade2;
+    --text-close: #8899aa;
+    --text-close-hover: #fff;
+
+    --border-color: #3a4a5d;
+    --border-light: #3a4a5d;
+    --border-input: #3a4a5d;
+    --border-tooltip: #1a2332;
+
+    --shadow-card: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-modal: 0 4px 16px rgba(0,0,0,0.4);
+    --shadow-tooltip: 0 4px 16px rgba(0,0,0,0.5);
+    --shadow-dropdown: 0 4px 12px rgba(0,0,0,0.4);
+
+    --highlight-bg: #3d3520;
+
+    --accent-blue: #5dade2;
+    --accent-green: #2ecc71;
+    --accent-green-hover: #27ae60;
+    --accent-red: #e74c3c;
+    --accent-red-hover: #c0392b;
+    --btn-download: #2980b9;
+    --btn-download-hover: #3498db;
+    --pagination-active: #2980b9;
+  }
+
   html { scroll-behavior: smooth; }
   body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #eef2f3;
+    background-color: var(--bg-body);
+    color: var(--text-primary);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    transition: background-color 0.3s, color 0.3s;
   }
 
   .topbar {
     width: 100%;
-    background-color: #2c3e50;
+    background-color: var(--bg-topbar);
     padding: 10px 20px;
     display: flex;
     align-items: center;
@@ -28,27 +128,41 @@
     top: 0; left: 0; z-index: 20;
     box-sizing: border-box;
     height: 60px;
+    transition: background-color 0.3s;
   }
-  .topbar-title { color: white; font-weight: bold; font-size: 1.1em; }
+  .topbar-title { color: var(--text-topbar); font-weight: bold; font-size: 1.1em; }
 
   .desktop-menu { display: flex; gap: 4px; margin-left: 20px; }
   .desktop-menu a {
-    color: #fff; text-decoration: none; padding: 8px 12px;
+    color: var(--text-topbar); text-decoration: none; padding: 8px 12px;
     border-radius: 4px; font-size: 1em; font-family: inherit; transition: background 0.2s;
   }
   .desktop-menu a:hover { background-color: rgba(255,255,255,0.1); }
 
+  /* === Кнопка темы === */
+  .theme-toggle {
+    background: none; border: 1px solid rgba(255,255,255,0.3);
+    color: var(--text-topbar); font-size: 1.2em; cursor: pointer;
+    padding: 4px 10px; border-radius: 8px; transition: background 0.2s, border-color 0.2s;
+    line-height: 1; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .theme-toggle:hover { background-color: rgba(255,255,255,0.1); }
+
+  .topbar-right {
+    display: flex; align-items: center; gap: 10px;
+  }
+
   .burger-btn { display: none; background: none; border: none; cursor: pointer; padding: 8px; }
-  .burger-btn span { display: block; width: 22px; height: 2px; background-color: #fff; margin: 5px 0; transition: 0.3s; }
+  .burger-btn span { display: block; width: 22px; height: 2px; background-color: var(--text-topbar); margin: 5px 0; transition: 0.3s; }
 
   .mobile-dropdown {
-    position: absolute; top: 100%; right: 0; background-color: #2c3e50;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px;
+    position: absolute; top: 100%; right: 0; background-color: var(--bg-mobile-dropdown);
+    box-shadow: var(--shadow-dropdown); border-radius: 8px;
     overflow: hidden; min-width: 280px; display: none; flex-direction: column; z-index: 9998;
   }
   .mobile-dropdown.active { display: flex !important; }
   .mobile-link-list a {
-    display: block; padding: 12px 16px; color: #fff; text-decoration: none;
+    display: block; padding: 12px 16px; color: var(--text-topbar); text-decoration: none;
     border-bottom: 1px solid rgba(255,255,255,0.08);
   }
   .mobile-link-list a:last-child { border-bottom: none; }
@@ -62,9 +176,10 @@
   .title-bar {
     display: flex; align-items: center; justify-content: center;
     width: 100%; padding: 8px 20px; margin-top: 60px;
-    background-color: #fff; border-bottom: 1px solid #ddd; box-sizing: border-box;
+    background-color: var(--bg-titlebar); border-bottom: 1px solid var(--border-light); box-sizing: border-box;
+    transition: background-color 0.3s, border-color 0.3s;
   }
-  .title-bar-label { font-weight: bold; font-size: 1.1em; color: #2c3e50; white-space: nowrap; }
+  .title-bar-label { font-weight: bold; font-size: 1.1em; color: var(--text-primary); white-space: nowrap; }
 
   .content-wrapper {
     max-width: 1440px;
@@ -74,41 +189,44 @@
   }
 
   .filters-container {
-    padding: 10px 20px; background-color: #fff;
+    padding: 10px 20px; background-color: var(--bg-filters);
     display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;
-    border-bottom: 1px solid #eee; align-items: end;
+    border-bottom: 1px solid var(--border-light); align-items: end;
+    transition: background-color 0.3s, border-color 0.3s;
   }
   .filter-group { display: flex; flex-direction: column; gap: 4px; }
-  .filter-label { font-size: 0.75em; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.5px; }
+  .filter-label { font-size: 0.75em; color: var(--text-filter-label); text-transform: uppercase; letter-spacing: 0.5px; }
   select, input {
-    padding: 6px 10px; border: 1px solid #ccc; border-radius: 5px;
-    font-size: 0.85em; background-color: #f9f9f9; font-family: inherit;
+    padding: 6px 10px; border: 1px solid var(--border-input); border-radius: 5px;
+    font-size: 0.85em; background-color: var(--bg-input); color: var(--text-primary); font-family: inherit;
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
   }
-  select:focus, input:focus { outline: none; border-color: #3498db; background-color: #fff; }
+  select:focus, input:focus { outline: none; border-color: var(--accent-blue); background-color: var(--bg-input-focus); }
 
   .btn-reset {
-    background-color: #e74c3c; color: white; border: none;
+    background-color: var(--accent-red); color: white; border: none;
     padding: 6px 18px; border-radius: 5px; cursor: pointer; font-weight: bold;
     white-space: nowrap; font-size: 0.85em; font-family: inherit;
   }
-  .btn-reset:hover { background-color: #c0392b; }
+  .btn-reset:hover { background-color: var(--accent-red-hover); }
   @media (max-width: 768px) { .btn-reset { grid-column: 1 / -1; text-align: center; padding: 10px; } }
 
   .main { margin-top: 0; padding: 20px; min-width: 0; box-sizing: border-box; }
-  h2 { margin-top: 0; color: #34495e; font-size: 1.15em; }
+  h2 { margin-top: 0; color: var(--text-label); font-size: 1.15em; }
 
   .stats-container { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; }
   @media (min-width: 768px) { .stats-container { grid-template-columns: 1fr 1fr; } }
 
   .stat-card {
-    background: #fff; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    padding: 14px; border-top: 4px solid #3498db;
+    background: var(--bg-card); border-radius: 6px; box-shadow: var(--shadow-card);
+    padding: 14px; border-top: 4px solid var(--accent-blue);
+    transition: background-color 0.3s, box-shadow 0.3s;
   }
-  .stat-card h3 { margin-top: 0; font-size: 1em; color: #2c3e50; }
+  .stat-card h3 { margin-top: 0; font-size: 1em; color: var(--text-primary); }
   .stat-list { list-style: none; padding: 0; margin: 8px 0 0 0; }
-  .stat-list li { padding: 5px 6px; border-bottom: 1px dashed #eee; font-size: 0.85em; color: #555; }
+  .stat-list li { padding: 5px 6px; border-bottom: 1px dashed var(--border-light); font-size: 0.85em; color: var(--text-secondary); }
   .stat-list li:last-child { border-bottom: none; }
-  .stat-list a { color: #3498db; text-decoration: none; font-weight: 600; }
+  .stat-list a { color: var(--text-link); text-decoration: none; font-weight: 600; }
   .stat-list a:hover { text-decoration: underline; }
 
   .events-grid {
@@ -134,8 +252,9 @@
   }
 
   .event-card-compact {
-    background-color: #fff; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    background-color: var(--bg-card); border-radius: 6px; box-shadow: var(--shadow-card);
     overflow: hidden; display: flex; flex-direction: column; min-width: 0;
+    transition: background-color 0.3s, box-shadow 0.3s;
   }
   .banner-img-wrapper { height: 110px; width: 100%; position: relative; }
   .banner-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
@@ -148,16 +267,19 @@
   .banner-title span { font-size: 0.75em; opacity: 0.9; display: block; margin-top: 3px; }
   .event-details { padding: 10px; flex: 1; display: flex; flex-direction: column; }
   .detail-box {
-    background-color: #f1f2f6; padding: 5px 7px; border-radius: 4px;
-    font-size: 0.78em; margin-bottom: 5px;
+    background-color: var(--bg-detail); padding: 5px 7px; border-radius: 4px;
+    font-size: 0.78em; margin-bottom: 5px; color: var(--text-detail);
+    transition: background-color 0.3s, color 0.3s;
   }
+  .detail-box strong { color: var(--text-primary); }
   
   .buttons {
     padding: 12px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border-light);
     display: flex;
     gap: 8px;
     align-items: stretch; 
+    transition: border-color 0.3s;
   }
 
   a.btn-download, a.btn-view, button.btn-view {
@@ -168,7 +290,7 @@
     align-items: center;
     min-height: 40px; 
     padding: 0; 
-    background-color: #2980b9;
+    background-color: var(--btn-download);
     color: #fff;
     text-decoration: none;
     border-radius: 4px;
@@ -180,27 +302,27 @@
     transition: background 0.2s;
   }
 
-  a.btn-download:hover { background-color: #3498db; }
-  a.btn-view:hover, button.btn-view:hover { background-color: #2ecc71; }
-  a.btn-view { background-color: #27ae60; }
-  button.btn-view { background-color: #27ae60; border: none; }
+  a.btn-download:hover { background-color: var(--btn-download-hover); }
+  a.btn-view:hover, button.btn-view:hover { background-color: var(--accent-green-hover); }
+  a.btn-view { background-color: var(--accent-green); }
+  button.btn-view { background-color: var(--accent-green); border: none; }
 
   .no-results {
     display: none; grid-column: 1 / -1; text-align: center;
-    padding: 40px 20px; color: #555; font-size: 1.1em;
-    background-color: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 40px 20px; color: var(--text-secondary); font-size: 1.1em;
+    background-color: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-modal);
   }
 
   .pagination-container {
     margin-top: 25px; text-align: center; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap;
   }
   .pagination-container button {
-    padding: 6px 14px; border: 1px solid #ccc; border-radius: 5px;
-    background: #fff; cursor: pointer; font-family: inherit; font-size: 0.9em; transition: all 0.2s;
+    padding: 6px 14px; border: 1px solid var(--border-input); border-radius: 5px;
+    background: var(--bg-card); color: var(--text-primary); cursor: pointer; font-family: inherit; font-size: 0.9em; transition: all 0.2s;
   }
-  .pagination-container button:hover { background: #f0f0f0; }
+  .pagination-container button:hover { background: var(--bg-pagination-hover); }
   .pagination-container button.active {
-    background: #2980b9; color: #fff; border-color: #2980b9;
+    background: var(--pagination-active); color: #fff; border-color: var(--pagination-active);
   }
 
   #previewModal {
@@ -208,41 +330,43 @@
     background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;
   }
   .modal-content {
-    background: white; width: 90%; max-width: 900px; height: 85vh;
+    background: var(--bg-card); color: var(--text-primary); width: 90%; max-width: 900px; height: 85vh;
     border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+    transition: background-color 0.3s, color 0.3s;
   }
   .modal-header {
-    padding: 12px 18px; border-bottom: 1px solid #eee;
-    display: flex; justify-content: space-between; align-items: center; background: #f8f9fa;
+    padding: 12px 18px; border-bottom: 1px solid var(--border-light);
+    display: flex; justify-content: space-between; align-items: center; background: var(--bg-modal-header);
+    transition: background-color 0.3s, border-color 0.3s;
   }
-  .modal-title { margin: 0; font-size: 1.1em; color: #2c3e50; }
-  .close-btn { background: none; border: none; color: #999; font-size: 1.5em; cursor: pointer; }
-  .close-btn:hover { color: #000; }
+  .modal-title { margin: 0; font-size: 1.1em; color: var(--text-primary); }
+  .close-btn { background: none; border: none; color: var(--text-close); font-size: 1.5em; cursor: pointer; }
+  .close-btn:hover { color: var(--text-close-hover); }
   .modal-body { padding: 18px; overflow-y: auto; flex: 1; }
   .table-wrapper { margin-bottom: 25px; overflow-x: auto; }
   .table-wrapper h4 {
-    margin-top: 0; margin-bottom: 10px; color: #2c3e50;
-    border-left: 4px solid #27ae60; padding-left: 10px;
+    margin-top: 0; margin-bottom: 10px; color: var(--text-primary);
+    border-left: 4px solid var(--accent-green); padding-left: 10px;
   }
   table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-  th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-  th { background-color: #f8f9fa; font-weight: bold; }
-  tr:hover { background-color: #f5f5f5; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
+  th { background-color: var(--bg-th); font-weight: bold; }
+  tr:hover { background-color: var(--bg-tr-hover); }
 
-  .loading { text-align: center; padding: 40px; color: #7f8c8d; font-size: 1.2em; }
+  .loading { text-align: center; padding: 40px; color: var(--text-muted); font-size: 1.2em; }
 
   /* Tooltip — фиксированное позиционирование через JS */
   .tooltip-wrap { position: relative; display: inline-block; cursor: help; }
   .tooltip-text {
     visibility: hidden; opacity: 0; transition: opacity 0.2s;
     position: fixed;
-    background-color: #2c3e50; color: #fff; text-align: left;
+    background-color: var(--border-tooltip); color: #fff; text-align: left;
     padding: 12px 16px; border-radius: 8px;
     font-size: 1rem; font-weight: normal;
     text-transform: none; letter-spacing: 0; line-height: 1.5;
     white-space: normal; width: 300px; max-width: calc(100vw - 32px);
     z-index: 10000;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    box-shadow: var(--shadow-tooltip);
     pointer-events: none;
   }
   .tooltip-text.show { visibility: visible; opacity: 1; }
@@ -255,12 +379,12 @@
     visibility: hidden; opacity: 0; transition: opacity 0.2s;
   }
   .tooltip-arrow.show { visibility: visible; opacity: 1; }
-  .tooltip-arrow.arrow-bottom { border-top-color: #2c3e50; border-bottom: none; }
-  .tooltip-arrow.arrow-top { border-bottom-color: #2c3e50; border-top: none; }
+  .tooltip-arrow.arrow-bottom { border-top-color: var(--border-tooltip); border-bottom: none; }
+  .tooltip-arrow.arrow-top { border-bottom-color: var(--border-tooltip); border-top: none; }
   
-  .required-star { color: #e74c3c; margin-left: 2px; }
-  .athlete-highlight { background-color: #fff3cd !important; }
-  .athlete-highlight td:nth-child(2) { font-weight: bold; }
+  .required-star { color: var(--accent-red); margin-left: 2px; }
+  .athlete-highlight { background-color: var(--highlight-bg) !important; }
+  .athlete-highlight td.name-col { font-weight: bold; }
 </style>
 </head>
 <body>
@@ -272,14 +396,17 @@
       <a href="reglament.html">Регламент</a>
       <a href="athletes.html">Спортсмены</a>
     </nav>
-    <button id="mobileMenuBtn" class="burger-btn" onclick="toggleMobileMenu()">
-      <span></span><span></span><span></span>
-    </button>
-    <div id="mobileDropdown" class="mobile-dropdown">
-      <div class="mobile-link-list">
-        <a href="index.html">Главная</a>
-        <a href="reglament.html">Регламент</a>
-        <a href="athletes.html">Спортсмены</a>
+    <div class="topbar-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Сменить тему">&#127769;</button>
+      <button id="mobileMenuBtn" class="burger-btn" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </button>
+      <div id="mobileDropdown" class="mobile-dropdown">
+        <div class="mobile-link-list">
+          <a href="index.html">Главная</a>
+          <a href="reglament.html">Регламент</a>
+          <a href="athletes.html">Спортсмены</a>
+        </div>
       </div>
     </div>
   </div>
@@ -322,12 +449,13 @@
         <select id="filter-age" onchange="applyFilters()">
           <option value="">Все группы</option>
           <option value="Мужчины(Женщины)">Мужчины(Женщины)</option>
-          <option value="Студенты 17-25">Студенты 17-25</option>
+	  <option value="Студенты 17-25">Студенты 17-25</option>
           <option value="Юниоры(Юниорки) 21-22">Юниоры(Юниорки) 21-22</option>
           <option value="Юниоры(Юниорки) 18-20">Юниоры(Юниорки) 18-20</option>
           <option value="Юноши(Девушки) 16-17">Юноши(Девушки) 16-17</option>
           <option value="Юноши(Девушки) 14-15">Юноши(Девушки) 14-15</option>
           <option value="Юноши(Девушки) 12-13">Юноши(Девушки) 12-13</option>
+	  <option value="Ветераны">Ветераны</option>
         </select>
       </div>
       <div class="filter-group">
@@ -390,11 +518,49 @@
   </div>
 
 <script>
+  // ===== ПЕРЕКЛЮЧЕНИЕ ТЕМЫ =====
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    updateThemeButton(next);
+  }
+
+  function updateThemeButton(theme) {
+    var btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.innerHTML = theme === 'dark' ? '&#9728;' : '&#127769;';
+    }
+  }
+
+  (function() {
+    var saved = localStorage.getItem('theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeButton(saved);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      updateThemeButton('dark');
+    }
+  })();
+
   var allEvents = [];
   var filteredEvents = [];
   var currentAthleteQuery = "";
   var currentPage = 1;
   var itemsPerPage = 12;
+
+  var DEFAULT_COLUMNS = [
+    {key: "p",  label: "Место"},
+    {key: "n",  label: "Имя Фамилия"},
+    {key: "y",  label: "Год рожд."},
+    {key: "c",  label: "Страна(Субъект)"},
+    {key: "s",  label: "Стрельба"},
+    {key: "st", label: "Силовая"},
+    {key: "r",  label: "Гонка"},
+    {key: "t",  label: "Сумма"}
+  ];
 
   // ===== Tooltip positioning =====
   (function() {
@@ -420,10 +586,7 @@
       var margin = 16;
       var gap = 8;
       
-      // Default: position below the label
       var placeBelow = true;
-      
-      // If not enough space below, place above
       var spaceBelow = vh - rect.bottom;
       var spaceAbove = rect.top;
       
@@ -432,39 +595,33 @@
       }
       
       var top;
+      var tooltipBg = getComputedStyle(document.documentElement).getPropertyValue('--border-tooltip').trim();
       if (placeBelow) {
         top = rect.bottom + gap;
         arrow.className = 'tooltip-arrow arrow-top show';
         arrow.style.borderTopColor = '';
-        arrow.style.borderBottomColor = '#2c3e50';
+        arrow.style.borderBottomColor = tooltipBg;
       } else {
         top = rect.top - tipRect.height - gap;
         arrow.className = 'tooltip-arrow arrow-bottom show';
-        arrow.style.borderTopColor = '#2c3e50';
+        arrow.style.borderTopColor = tooltipBg;
         arrow.style.borderBottomColor = '';
       }
       
-      // Horizontal: try to center on the label, but clamp within viewport
       var tipWidth = tipRect.width;
       var preferredLeft = rect.left + rect.width / 2 - tipWidth / 2;
       
-      // Clamp left edge
       var left = Math.max(margin, preferredLeft);
-      // Clamp right edge
       if (left + tipWidth > vw - margin) {
         left = vw - margin - tipWidth;
       }
-      // If still less than margin (very narrow), just use margin
       if (left < margin) left = margin;
       
       tip.style.left = left + 'px';
       tip.style.top = top + 'px';
       
-      // Position arrow: point at the center of the label
       var arrowLeft = rect.left + rect.width / 2 - 7;
-      // Clamp arrow within tooltip bounds
       arrowLeft = Math.max(left + 10, Math.min(arrowLeft, left + tipWidth - 20));
-      
       arrow.style.left = arrowLeft + 'px';
       
       if (placeBelow) {
@@ -697,12 +854,34 @@
     applyFilters();
   }
 
-  function buildTable(group, rows) {
+  function buildTable(group, rows, columns) {
+    if (!columns || columns.length === 0) {
+      columns = DEFAULT_COLUMNS;
+    }
+
     var html = '<div class="table-wrapper"><h4>' + group + '</h4><table>';
-    html += '<thead><tr><th>Место</th><th>Имя Фамилия</th><th>Год рожд.</th><th>Страна(Субъект)</th><th>Стрельба</th><th>Силовая</th><th>Гонка</th><th>Сумма</th></tr></thead><tbody>';
+    
+    html += '<thead><tr>';
+    columns.forEach(function(col) {
+      html += '<th>' + (col.label || col.key) + '</th>';
+    });
+    html += '</tr></thead><tbody>';
+
     if (rows) {
       rows.forEach(function(r) {
-        html += '<tr><td>' + (r.p || '-') + '</td><td>' + (r.n || '-') + '</td><td>' + (r.y || '-') + '</td><td>' + (r.c || '-') + '</td><td>' + (r.s || '-') + '</td><td>' + (r.st || '-') + '</td><td>' + (r.r || '-') + '</td><td><strong>' + (r.t || '-') + '</strong></td></tr>';
+        html += '<tr>';
+        columns.forEach(function(col) {
+          var val = r[col.key];
+          if (val === undefined || val === null || val === '') {
+            val = '-';
+          }
+          if (col.key === 't') {
+            html += '<td><strong>' + val + '</strong></td>';
+          } else {
+            html += '<td>' + val + '</td>';
+          }
+        });
+        html += '</tr>';
       });
     }
     html += '</tbody></table></div>';
@@ -718,7 +897,7 @@
     var bodyHtml = '';
     if (data.tables) {
       data.tables.forEach(function(t) {
-        bodyHtml += buildTable(t.group, t.rows);
+        bodyHtml += buildTable(t.group, t.rows, t.columns);
       });
     }
     document.getElementById('modalBody').innerHTML = bodyHtml;
@@ -726,10 +905,25 @@
     if (currentAthleteQuery) {
       var rows = document.querySelectorAll('#modalBody tbody tr');
       var firstMatch = null;
+      
+      var nameColIndex = 1;
+      var firstTable = data.tables && data.tables[0];
+      if (firstTable && firstTable.columns) {
+        for (var ci = 0; ci < firstTable.columns.length; ci++) {
+          if (firstTable.columns[ci].key === 'n') {
+            nameColIndex = ci;
+            break;
+          }
+        }
+      } else {
+        nameColIndex = 1;
+      }
+
       rows.forEach(function(row) {
-        var nameCell = row.querySelector('td:nth-child(2)');
+        var nameCell = row.children[nameColIndex];
         if (nameCell && matchAthlete(currentAthleteQuery, nameCell.textContent)) {
           row.classList.add('athlete-highlight');
+          nameCell.classList.add('name-col');
           if (!firstMatch) firstMatch = row;
         }
       });
