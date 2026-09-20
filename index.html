@@ -117,27 +117,18 @@
     gap: 16px;
   }
 
-  /* 1100-1439: 6 колонок */
   @media (max-width: 1439px) and (min-width: 1100px) {
     .events-grid { grid-template-columns: repeat(6, 1fr); }
   }
-
-  /* 769-1099: 4 колонки */
   @media (max-width: 1099px) and (min-width: 769px) {
     .events-grid { grid-template-columns: repeat(4, 1fr); }
   }
-
-  /* 560-768: 3 колонки */
   @media (max-width: 768px) and (min-width: 560px) {
     .events-grid { grid-template-columns: repeat(3, 1fr); }
   }
-
-  /* 390-559: 2 колонки */
   @media (max-width: 559px) and (min-width: 390px) {
     .events-grid { grid-template-columns: repeat(2, 1fr); }
   }
-
-  /* до 389: 1 колонка */
   @media (max-width: 389px) {
     .events-grid { grid-template-columns: 1fr; }
   }
@@ -161,42 +152,38 @@
     font-size: 0.78em; margin-bottom: 5px;
   }
   
-.buttons {
-  padding: 12px;
-  border-top: 1px solid #eee;
-  display: flex;
-  gap: 8px;
-  /* Добавляем это, чтобы кнопки были одной высоты и текст сидел ровно */
-  align-items: stretch; 
-}
+  .buttons {
+    padding: 12px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 8px;
+    align-items: stretch; 
+  }
 
-a.btn-download, a.btn-view, button.btn-view {
-  flex: 1;
-  text-align: center;
-  /* Центрируем текст строго по вертикали */
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 40px; /* Фиксируем высоту, чтобы кнопки не прыгали */
-  padding: 0; /* Убираем внутренние отступы, они теперь не нужны */
-  background-color: #2980b9;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 4px;
-  font-size: 0.85em;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.2s;
-}
+  a.btn-download, a.btn-view, button.btn-view {
+    flex: 1;
+    text-align: center;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40px; 
+    padding: 0; 
+    background-color: #2980b9;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+  }
 
-/* Отдельные стили для разных кнопок */
-a.btn-download:hover { background-color: #3498db; }
-a.btn-view:hover, button.btn-view:hover { background-color: #2ecc71; }
-
-a.btn-view { background-color: #27ae60; }
-button.btn-view { background-color: #27ae60; border: none; }
+  a.btn-download:hover { background-color: #3498db; }
+  a.btn-view:hover, button.btn-view:hover { background-color: #2ecc71; }
+  a.btn-view { background-color: #27ae60; }
+  button.btn-view { background-color: #27ae60; border: none; }
 
   .no-results {
     display: none; grid-column: 1 / -1; text-align: center;
@@ -243,6 +230,37 @@ button.btn-view { background-color: #27ae60; border: none; }
   tr:hover { background-color: #f5f5f5; }
 
   .loading { text-align: center; padding: 40px; color: #7f8c8d; font-size: 1.2em; }
+
+  /* Tooltip — фиксированное позиционирование через JS */
+  .tooltip-wrap { position: relative; display: inline-block; cursor: help; }
+  .tooltip-text {
+    visibility: hidden; opacity: 0; transition: opacity 0.2s;
+    position: fixed;
+    background-color: #2c3e50; color: #fff; text-align: left;
+    padding: 12px 16px; border-radius: 8px;
+    font-size: 1rem; font-weight: normal;
+    text-transform: none; letter-spacing: 0; line-height: 1.5;
+    white-space: normal; width: 300px; max-width: calc(100vw - 32px);
+    z-index: 10000;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    pointer-events: none;
+  }
+  .tooltip-text.show { visibility: visible; opacity: 1; }
+  .tooltip-arrow {
+    position: fixed;
+    width: 0; height: 0;
+    border: 7px solid transparent;
+    z-index: 10001;
+    pointer-events: none;
+    visibility: hidden; opacity: 0; transition: opacity 0.2s;
+  }
+  .tooltip-arrow.show { visibility: visible; opacity: 1; }
+  .tooltip-arrow.arrow-bottom { border-top-color: #2c3e50; border-bottom: none; }
+  .tooltip-arrow.arrow-top { border-bottom-color: #2c3e50; border-top: none; }
+  
+  .required-star { color: #e74c3c; margin-left: 2px; }
+  .athlete-highlight { background-color: #fff3cd !important; }
+  .athlete-highlight td:nth-child(2) { font-weight: bold; }
 </style>
 </head>
 <body>
@@ -273,28 +291,30 @@ button.btn-view { background-color: #27ae60; border: none; }
 
     <div class="filters-container">
       <div class="filter-group">
-        <label class="filter-label">Год</label>
+        <label class="filter-label">Период</label>
         <select id="filter-year" onchange="applyFilters()">
-          <option value="">Все годы</option>
-          <option value="2027">2027</option>
-          <option value="2026">2026</option>
-          <option value="2025">2025</option>
-          <option value="2024">2024</option>
-          <option value="2023">2023</option>
-          <option value="2022">2022</option>
-          <option value="2021">2021</option>
-          <option value="2020">2020</option>
-          <option value="2019">2019</option>
-          <option value="1995">1995</option>
+          <option value="">Все периоды</option>
+          <option value="2025-2026">2025–2026</option>
+          <option value="2023-2024">2023–2024</option>
+          <option value="2020-2022">2020–2022</option>
+          <option value="2015-2019">2015–2019</option>
+          <option value="2010-2014">2010–2014</option>
+          <option value="2005-2009">2005–2009</option>
+          <option value="2000-2004">2000–2004</option>
+          <option value="1990-1999">1990–1999</option>
         </select>
       </div>
       <div class="filter-group">
         <label class="filter-label">Дисциплина</label>
         <select id="filter-discipline" onchange="applyFilters()">
           <option value="">Любая дисциплина</option>
+          <option value="эстафета">эстафета</option>
           <option value="3-борье с лыжной гонкой">3-борье с лыжной гонкой</option>
-          <option value="4-борье с лыжной гонкой">4-борье с лыжной гонкой</option>
+          <option value="3-борье с лыжероллерной гонкой">3-борье с лыжероллерной гонкой</option>
+          <option value="3-борье с плаванием">3-борье с плаванием</option>
           <option value="3-борье с бегом">3-борье с бегом</option>
+          <option value="4-борье с бегом">4-борье с бегом</option>
+          <option value="5-борье с бегом">5-борье с бегом</option>
         </select>
       </div>
       <div class="filter-group">
@@ -302,19 +322,32 @@ button.btn-view { background-color: #27ae60; border: none; }
         <select id="filter-age" onchange="applyFilters()">
           <option value="">Все группы</option>
           <option value="Мужчины(Женщины)">Мужчины(Женщины)</option>
+          <option value="Студенты 17-25">Студенты 17-25</option>
+          <option value="Юниоры(Юниорки) 21-22">Юниоры(Юниорки) 21-22</option>
           <option value="Юниоры(Юниорки) 18-20">Юниоры(Юниорки) 18-20</option>
           <option value="Юноши(Девушки) 16-17">Юноши(Девушки) 16-17</option>
           <option value="Юноши(Девушки) 14-15">Юноши(Девушки) 14-15</option>
+          <option value="Юноши(Девушки) 12-13">Юноши(Девушки) 12-13</option>
         </select>
       </div>
       <div class="filter-group">
         <label class="filter-label">Соревнования</label>
         <select id="filter-event" onchange="applyFilters()">
-          <option value="">Любые соревнования</option>
+          <option value="">Все соревнования</option>
+          <option value="Чемпионат Мира">Чемпионат Мира</option>
+          <option value="Первенство Мира">Первенство Мира</option>
+          <option value="Кубок Мира">Кубок Мира</option>
           <option value="Чемпионат России">Чемпионат России</option>
           <option value="Первенство России">Первенство России</option>
           <option value="Кубок России">Кубок России</option>
+          <option value="Всероссийские соревнования">Всероссийские соревнования</option>
         </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">
+          <span class="tooltip-wrap" id="athleteTooltipWrap">Спортсмены (топ-5)<span class="required-star">*</span></span>
+        </label>
+        <input type="text" id="filter-athlete" placeholder="Имя или фамилия" oninput="applyFilters()" />
       </div>
       <button class="btn-reset" onclick="resetFilters()">Сбросить</button>
     </div>
@@ -342,6 +375,10 @@ button.btn-view { background-color: #27ae60; border: none; }
     </div>
   </div>
 
+  <!-- Tooltip elements (fixed position, positioned by JS) -->
+  <div class="tooltip-text" id="athleteTooltip">Введите имя или фамилию спортсмена для поиска и фильтрации соревнований. В быстром просмотре совпавшие строки подсвечиваются</div>
+  <div class="tooltip-arrow" id="athleteTooltipArrow"></div>
+
   <div id="previewModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -355,12 +392,103 @@ button.btn-view { background-color: #27ae60; border: none; }
 <script>
   var allEvents = [];
   var filteredEvents = [];
+  var currentAthleteQuery = "";
   var currentPage = 1;
   var itemsPerPage = 12;
 
+  // ===== Tooltip positioning =====
+  (function() {
+    var wrap = document.getElementById('athleteTooltipWrap');
+    var tip = document.getElementById('athleteTooltip');
+    var arrow = document.getElementById('athleteTooltipArrow');
+    
+    function showTip() {
+      tip.classList.add('show');
+      arrow.classList.add('show');
+      positionTip();
+    }
+    function hideTip() {
+      tip.classList.remove('show');
+      arrow.classList.remove('show');
+    }
+    
+    function positionTip() {
+      var rect = wrap.getBoundingClientRect();
+      var tipRect = tip.getBoundingClientRect();
+      var vw = window.innerWidth;
+      var vh = window.innerHeight;
+      var margin = 16;
+      var gap = 8;
+      
+      // Default: position below the label
+      var placeBelow = true;
+      
+      // If not enough space below, place above
+      var spaceBelow = vh - rect.bottom;
+      var spaceAbove = rect.top;
+      
+      if (spaceBelow < tipRect.height + gap + margin && spaceAbove > tipRect.height + gap + margin) {
+        placeBelow = false;
+      }
+      
+      var top;
+      if (placeBelow) {
+        top = rect.bottom + gap;
+        arrow.className = 'tooltip-arrow arrow-top show';
+        arrow.style.borderTopColor = '';
+        arrow.style.borderBottomColor = '#2c3e50';
+      } else {
+        top = rect.top - tipRect.height - gap;
+        arrow.className = 'tooltip-arrow arrow-bottom show';
+        arrow.style.borderTopColor = '#2c3e50';
+        arrow.style.borderBottomColor = '';
+      }
+      
+      // Horizontal: try to center on the label, but clamp within viewport
+      var tipWidth = tipRect.width;
+      var preferredLeft = rect.left + rect.width / 2 - tipWidth / 2;
+      
+      // Clamp left edge
+      var left = Math.max(margin, preferredLeft);
+      // Clamp right edge
+      if (left + tipWidth > vw - margin) {
+        left = vw - margin - tipWidth;
+      }
+      // If still less than margin (very narrow), just use margin
+      if (left < margin) left = margin;
+      
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+      
+      // Position arrow: point at the center of the label
+      var arrowLeft = rect.left + rect.width / 2 - 7;
+      // Clamp arrow within tooltip bounds
+      arrowLeft = Math.max(left + 10, Math.min(arrowLeft, left + tipWidth - 20));
+      
+      arrow.style.left = arrowLeft + 'px';
+      
+      if (placeBelow) {
+        arrow.style.top = (top - 7) + 'px';
+      } else {
+        arrow.style.top = (top + tipRect.height) + 'px';
+      }
+    }
+    
+    wrap.addEventListener('mouseenter', showTip);
+    wrap.addEventListener('mouseleave', hideTip);
+    wrap.addEventListener('focus', showTip);
+    wrap.addEventListener('blur', hideTip);
+    window.addEventListener('scroll', function() {
+      if (tip.classList.contains('show')) positionTip();
+    }, true);
+    window.addEventListener('resize', function() {
+      if (tip.classList.contains('show')) positionTip();
+    });
+  })();
+
   async function loadData() {
     try {
-      var res = await fetch('events.json');
+      var res = await fetch('events.json?v=' + Date.now());
       if (!res.ok) throw new Error('HTTP ' + res.status);
       allEvents = await res.json();
       allEvents.sort(function(a, b) { return b.year - a.year; });
@@ -402,16 +530,71 @@ button.btn-view { background-color: #27ae60; border: none; }
     });
   }
 
+  function matchAthlete(query, name) {
+    if (!query || !name) return false;
+    var q = query.toLowerCase().trim();
+    var n = name.toLowerCase().trim();
+    if (!q || !n) return false;
+    var qTokens = q.split(/\s+/).filter(function(t) { return t.length > 0; });
+    var nTokens = n.split(/\s+/).filter(function(t) { return t.length > 0; });
+    for (var i = 0; i < qTokens.length; i++) {
+      var found = false;
+      for (var j = 0; j < nTokens.length; j++) {
+        if (nTokens[j].indexOf(qTokens[i]) !== -1 || qTokens[i].indexOf(nTokens[j]) !== -1) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) return false;
+    }
+    return true;
+  }
+
+  function eventMatchesAthlete(event, query) {
+    if (!query || !event.tables) return false;
+    for (var i = 0; i < event.tables.length; i++) {
+      var rows = event.tables[i].rows;
+      if (!rows) continue;
+      for (var j = 0; j < rows.length; j++) {
+        if (matchAthlete(query, rows[j].n)) return true;
+      }
+    }
+    return false;
+  }
+
   function applyFilters() {
     var fYear = document.getElementById('filter-year').value;
     var fDisc = document.getElementById('filter-discipline').value;
     var fAge  = document.getElementById('filter-age').value;
     var fEvent = document.getElementById('filter-event').value;
+    var fAthlete = document.getElementById('filter-athlete').value;
+    currentAthleteQuery = fAthlete.trim();
 
     filteredEvents = allEvents.filter(function(card) {
-      var matchYear = (fYear === '' || String(card.year) === fYear);
-      var matchDisc = (fDisc === '' || card.discipline === fDisc);
-      var matchEvent = (fEvent === '' || card.event === fEvent);
+      var matchYear = true;
+      if (fYear !== '') {
+        var cardYear = parseInt(card.year, 10);
+        if (fYear.indexOf('-') !== -1) {
+          var parts = fYear.split('-');
+          var startYear = parseInt(parts[0], 10);
+          var endYear = parseInt(parts[1], 10);
+          matchYear = (cardYear >= startYear && cardYear <= endYear);
+        } else {
+          matchYear = (String(card.year) === fYear);
+        }
+      }
+
+      var matchDisc = (fDisc === '');
+      if (fDisc !== '' && card.discipline) {
+        var discs = card.discipline.split(';').map(function(d) { return d.trim(); });
+        if (discs.indexOf(fDisc) !== -1) matchDisc = true;
+      }
+
+      var matchEvent = (fEvent === '');
+      if (fEvent !== '' && card.event) {
+        var events = card.event.split(';').map(function(ev) { return ev.trim(); });
+        if (events.indexOf(fEvent) !== -1) matchEvent = true;
+      }
 
       var matchAge = (fAge === '');
       if (fAge !== '' && card.age) {
@@ -419,7 +602,11 @@ button.btn-view { background-color: #27ae60; border: none; }
         if (ages.indexOf(fAge) !== -1) matchAge = true;
       }
 
-      return matchYear && matchDisc && matchAge && matchEvent;
+      var matchAthleteFlag = true;
+      if (fAthlete !== '') {
+        matchAthleteFlag = eventMatchesAthlete(card, fAthlete);
+      }
+      return matchYear && matchDisc && matchAge && matchEvent && matchAthleteFlag;
     });
 
     filteredEvents.sort(function(a, b) { return b.year - a.year; });
@@ -505,12 +692,14 @@ button.btn-view { background-color: #27ae60; border: none; }
     document.getElementById('filter-discipline').value = '';
     document.getElementById('filter-age').value = '';
     document.getElementById('filter-event').value = '';
+    document.getElementById('filter-athlete').value = '';
+    currentAthleteQuery = '';
     applyFilters();
   }
 
   function buildTable(group, rows) {
     var html = '<div class="table-wrapper"><h4>' + group + '</h4><table>';
-    html += '<thead><tr><th>Место</th><th>Имя Фамилия</th><th>Год рожд.</th><th>Страна</th><th>Стрельба</th><th>Силовая</th><th>Гонка</th><th>Сумма</th></tr></thead><tbody>';
+    html += '<thead><tr><th>Место</th><th>Имя Фамилия</th><th>Год рожд.</th><th>Страна(Субъект)</th><th>Стрельба</th><th>Силовая</th><th>Гонка</th><th>Сумма</th></tr></thead><tbody>';
     if (rows) {
       rows.forEach(function(r) {
         html += '<tr><td>' + (r.p || '-') + '</td><td>' + (r.n || '-') + '</td><td>' + (r.y || '-') + '</td><td>' + (r.c || '-') + '</td><td>' + (r.s || '-') + '</td><td>' + (r.st || '-') + '</td><td>' + (r.r || '-') + '</td><td><strong>' + (r.t || '-') + '</strong></td></tr>';
@@ -533,6 +722,24 @@ button.btn-view { background-color: #27ae60; border: none; }
       });
     }
     document.getElementById('modalBody').innerHTML = bodyHtml;
+
+    if (currentAthleteQuery) {
+      var rows = document.querySelectorAll('#modalBody tbody tr');
+      var firstMatch = null;
+      rows.forEach(function(row) {
+        var nameCell = row.querySelector('td:nth-child(2)');
+        if (nameCell && matchAthlete(currentAthleteQuery, nameCell.textContent)) {
+          row.classList.add('athlete-highlight');
+          if (!firstMatch) firstMatch = row;
+        }
+      });
+      if (firstMatch) {
+        setTimeout(function() {
+          firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+    }
+
     document.getElementById('previewModal').style.display = 'flex';
   }
 
