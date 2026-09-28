@@ -1,965 +1,910 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Архив протоколов</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Архив протоколов</title>
 
 <style>
-  /* ===== ТЕМА: СВЕТЛАЯ (по умолчанию) ===== */
-  :root {
-    --bg-body: #eef2f3;
-    --bg-card: #fff;
-    --bg-topbar: #2c3e50;
-    --bg-titlebar: #fff;
-    --bg-filters: #fff;
-    --bg-input: #f9f9f9;
-    --bg-input-focus: #fff;
-    --bg-detail: #f1f2f6;
-    --bg-modal-header: #f8f9fa;
-    --bg-th: #f8f9fa;
-    --bg-tr-hover: #f5f5f5;
-    --bg-pagination-hover: #f0f0f0;
-    --bg-mobile-dropdown: #2c3e50;
+:root {
+--bg-body: #eef2f3; --bg-card: #fff; --bg-topbar: #2c3e50; --bg-titlebar: #fff;
+--bg-filters: #fff; --bg-input: #f9f9f9; --bg-input-focus: #fff; --bg-detail: #f1f2f6;
+--bg-modal-header: #f8f9fa; --bg-th: #f8f9fa; --bg-tr-hover: #f5f5f5;
+--bg-pagination-hover: #f0f0f0; --bg-mobile-dropdown: #2c3e50;
+--text-primary: #2c3e50; --text-secondary: #555; --text-muted: #7f8c8d;
+--text-detail: #2c3e50; --text-label: #34495e; --text-filter-label: #7f8c8d;
+--text-topbar: #fff; --text-link: #3498db; --text-close: #999; --text-close-hover: #000;
+--border-color: #ddd; --border-light: #eee; --border-input: #ccc; --border-tooltip: #2c3e50;
+--shadow-card: 0 2px 6px rgba(0,0,0,0.08); --shadow-modal: 0 2px 8px rgba(0,0,0,0.1);
+--shadow-tooltip: 0 4px 16px rgba(0,0,0,0.3); --shadow-dropdown: 0 4px 12px rgba(0,0,0,0.15);
+--highlight-bg: #fff3cd;
+--accent-blue: #3498db; --accent-green: #27ae60; --accent-green-hover: #2ecc71;
+--accent-red: #e74c3c; --accent-red-hover: #c0392b;
+--btn-download: #2980b9; --btn-download-hover: #3498db; --pagination-active: #2980b9;
+}
+[data-theme="dark"] {
+--bg-body: #1a2332; --bg-card: #243447; --bg-topbar: #1a2332; --bg-titlebar: #243447;
+--bg-filters: #243447; --bg-input: #1a2332; --bg-input-focus: #2a3a4d; --bg-detail: #2a3a4d;
+--bg-modal-header: #1a2332; --bg-th: #2a3a4d; --bg-tr-hover: #2a3a4d; --bg-pagination-hover: #2a3a4d;
+--bg-mobile-dropdown: #1a2332;
+--text-primary: #e0e6ed; --text-secondary: #b0b8c4; --text-muted: #8899aa;
+--text-detail: #d0d8e0; --text-label: #e0e6ed; --text-filter-label: #8899aa;
+--text-topbar: #e0e6ed; --text-link: #5dade2; --text-close: #8899aa; --text-close-hover: #fff;
+--border-color: #3a4a5d; --border-light: #3a4a5d; --border-input: #3a4a5d; --border-tooltip: #1a2332;
+--shadow-card: 0 2px 8px rgba(0,0,0,0.3); --shadow-modal: 0 4px 16px rgba(0,0,0,0.4);
+--shadow-tooltip: 0 4px 16px rgba(0,0,0,0.5); --shadow-dropdown: 0 4px 12px rgba(0,0,0,0.4);
+--highlight-bg: #3d3520;
+--accent-blue: #5dade2; --accent-green: #2ecc71; --accent-green-hover: #27ae60;
+--accent-red: #e74c3c; --accent-red-hover: #c0392b;
+}
+html { scroll-behavior: smooth; }
+body {
+margin: 0; font-family: Arial, sans-serif; background-color: var(--bg-body);
+color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column;
+overflow-x: hidden; transition: background-color 0.3s, color 0.3s;
+}
+.topbar {
+width: 100%; background-color: var(--bg-topbar); padding: 10px 20px;
+display: flex; align-items: center; justify-content: space-between;
+position: fixed; top: 0; left: 0; z-index: 20; box-sizing: border-box; height: 60px;
+transition: background-color 0.3s;
+}
+.topbar-title { color: var(--text-topbar); font-weight: bold; font-size: 1.1em; }
+.desktop-menu { display: flex; gap: 4px; margin-left: 20px; }
+.desktop-menu a {
+color: var(--text-topbar); text-decoration: none; padding: 8px 12px;
+border-radius: 4px; font-size: 1em; font-family: inherit; transition: background 0.2s;
+}
+.desktop-menu a:hover { background-color: rgba(255,255,255,0.1); }
+.theme-toggle {
+background: none; border: 1px solid rgba(255,255,255,0.3); color: var(--text-topbar);
+font-size: 1.2em; cursor: pointer; padding: 4px 10px; border-radius: 8px;
+transition: background 0.2s; line-height: 1;
+display: inline-flex; align-items: center; justify-content: center;
+}
+.theme-toggle:hover { background-color: rgba(255,255,255,0.1); }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.burger-btn { display: none; background: none; border: none; cursor: pointer; padding: 8px; }
+.burger-btn span { display: block; width: 22px; height: 2px; background-color: var(--text-topbar); margin: 5px 0; transition: 0.3s; }
+.mobile-dropdown {
+position: absolute; top: 100%; right: 0; background-color: var(--bg-mobile-dropdown);
+box-shadow: var(--shadow-dropdown); border-radius: 8px; overflow: hidden;
+min-width: 280px; display: none; flex-direction: column; z-index: 9998;
+}
+.mobile-dropdown.active { display: flex !important; }
+.mobile-link-list a {
+display: block; padding: 12px 16px; color: var(--text-topbar); text-decoration: none;
+border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.mobile-link-list a:last-child { border-bottom: none; }
+.mobile-link-list a:hover { background-color: rgba(255,255,255,0.1); }
+@media (max-width: 768px) { .burger-btn { display: block; } .desktop-menu { display: none; } }
+.title-bar {
+display: flex; align-items: center; justify-content: center; width: 100%;
+padding: 8px 20px; margin-top: 60px; background-color: var(--bg-titlebar);
+border-bottom: 1px solid var(--border-light); box-sizing: border-box;
+transition: background-color 0.3s, border-color 0.3s;
+}
+.title-bar-label { font-weight: bold; font-size: 1.1em; color: var(--text-primary); white-space: nowrap; }
+.content-wrapper { max-width: 1440px; width: 100%; margin: 0 auto; box-sizing: border-box; }
+.filters-container {
+padding: 10px 20px; background-color: var(--bg-filters);
+display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;
+border-bottom: 1px solid var(--border-light); align-items: end;
+transition: background-color 0.3s, border-color 0.3s;
+}
+.filter-group { display: flex; flex-direction: column; gap: 4px; }
+.filter-label { font-size: 0.75em; color: var(--text-filter-label); text-transform: uppercase; letter-spacing: 0.5px; }
+select, input {
+padding: 6px 10px; border: 1px solid var(--border-input); border-radius: 5px;
+font-size: 0.85em; background-color: var(--bg-input); color: var(--text-primary);
+font-family: inherit; transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+select:focus, input:focus { outline: none; border-color: var(--accent-blue); background-color: var(--bg-input-focus); }
+.btn-reset {
+background-color: var(--accent-red); color: white; border: none;
+padding: 6px 18px; border-radius: 5px; cursor: pointer; font-weight: bold;
+white-space: nowrap; font-size: 0.85em; font-family: inherit;
+}
+.btn-reset:hover { background-color: var(--accent-red-hover); }
+@media (max-width: 768px) { .btn-reset { grid-column: 1 / -1; text-align: center; padding: 10px; } }
+.main { margin-top: 0; padding: 20px; min-width: 0; box-sizing: border-box; }
+h2 { margin-top: 0; color: var(--text-label); font-size: 1.15em; }
+.stats-container { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; }
+@media (min-width: 768px) { .stats-container { grid-template-columns: 1fr 1fr; } }
+.stat-card {
+background: var(--bg-card); border-radius: 6px; box-shadow: var(--shadow-card);
+padding: 14px; border-top: 4px solid var(--accent-blue);
+transition: background-color 0.3s, box-shadow 0.3s;
+}
+.stat-card h3 { margin-top: 0; font-size: 1em; color: var(--text-primary); }
+.stat-list { list-style: none; padding: 0; margin: 8px 0 0 0; }
+.stat-list li { padding: 5px 6px; border-bottom: 1px dashed var(--border-light); font-size: 0.85em; color: var(--text-secondary); }
+.stat-list li:last-child { border-bottom: none; }
+.stat-list a { color: var(--text-link); text-decoration: none; font-weight: 600; }
+.stat-list a:hover { text-decoration: underline; }
+.events-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+@media (max-width: 1439px) and (min-width: 1100px) { .events-grid { grid-template-columns: repeat(6, 1fr); } }
+@media (max-width: 1099px) and (min-width: 769px) { .events-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 768px) and (min-width: 560px) { .events-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 559px) and (min-width: 390px) { .events-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 389px) { .events-grid { grid-template-columns: 1fr; } }
+.event-card-compact {
+background-color: var(--bg-card); border-radius: 6px; box-shadow: var(--shadow-card);
+overflow: hidden; display: flex; flex-direction: column; min-width: 0;
+transition: background-color 0.3s, box-shadow 0.3s;
+}
+.banner-img-wrapper { height: 110px; width: 100%; position: relative; }
+.banner-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+.banner-overlay {
+position: absolute; bottom: 0; left: 0; right: 0;
+background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+padding: 10px; box-sizing: border-box; color: white;
+}
+.banner-title { margin: 0; font-size: 0.95em; line-height: 1.3; }
+.banner-title span { font-size: 0.75em; opacity: 0.9; display: block; margin-top: 3px; }
+.event-details { padding: 10px; flex: 1; display: flex; flex-direction: column; }
+.detail-box {
+background-color: var(--bg-detail); padding: 5px 7px; border-radius: 4px;
+font-size: 0.78em; margin-bottom: 5px; color: var(--text-detail);
+transition: background-color 0.3s, color 0.3s;
+}
+.detail-box strong { color: var(--text-primary); }
+.buttons {
+padding: 12px; border-top: 1px solid var(--border-light);
+display: flex; gap: 8px; align-items: stretch; transition: border-color 0.3s;
+}
+a.btn-download, a.btn-view, button.btn-view {
+flex: 1; text-align: center; display: inline-flex; justify-content: center; align-items: center;
+min-height: 40px; padding: 0; background-color: var(--btn-download); color: #fff;
+text-decoration: none; border-radius: 4px; font-size: 0.85em; font-weight: bold;
+border: none; cursor: pointer; font-family: inherit; transition: background 0.2s;
+}
+a.btn-download:hover { background-color: var(--btn-download-hover); }
+a.btn-view:hover, button.btn-view:hover { background-color: var(--accent-green-hover); }
+a.btn-view, button.btn-view { background-color: var(--accent-green); }
+.no-results {
+display: none; grid-column: 1 / -1; text-align: center; padding: 40px 20px;
+color: var(--text-secondary); font-size: 1.1em; background-color: var(--bg-card);
+border-radius: 8px; box-shadow: var(--shadow-modal);
+}
+.pagination-container {
+margin-top: 25px; text-align: center; display: flex; justify-content: center;
+gap: 6px; flex-wrap: wrap; align-items: center;
+}
+.pagination-container button {
+padding: 6px 14px; border: 1px solid var(--border-input); border-radius: 5px;
+background: var(--bg-card); color: var(--text-primary); cursor: pointer;
+font-family: inherit; font-size: 0.9em; transition: all 0.2s;
+}
+.pagination-container button:hover:not(:disabled) { background: var(--bg-pagination-hover); }
+.pagination-container button.active {
+background: var(--pagination-active); color: #fff; border-color: var(--pagination-active);
+}
+.pagination-container button:disabled { opacity: 0.4; cursor: default; }
+.pagination-container .page-ellipsis { color: var(--text-muted); padding: 0 4px; }
+#previewModal {
+display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;
+}
+.modal-content {
+background: var(--bg-card); color: var(--text-primary); width: 90%; max-width: 900px; height: 85vh;
+border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+transition: background-color 0.3s, color 0.3s;
+}
+.modal-header {
+padding: 12px 18px; border-bottom: 1px solid var(--border-light);
+display: flex; justify-content: space-between; align-items: center;
+background: var(--bg-modal-header); transition: background-color 0.3s, border-color 0.3s;
+}
+.modal-title { margin: 0; font-size: 1.1em; color: var(--text-primary); }
+.close-btn { background: none; border: none; color: var(--text-close); font-size: 1.5em; cursor: pointer; }
+.close-btn:hover { color: var(--text-close-hover); }
+.modal-body { padding: 18px; overflow-y: auto; flex: 1; }
+.modal-loading { text-align: center; padding: 40px; color: var(--text-muted); font-size: 1.1em; }
+.table-wrapper { margin-bottom: 25px; overflow-x: auto; }
+.table-wrapper h4 {
+margin-top: 0; margin-bottom: 10px; color: var(--text-primary);
+border-left: 4px solid var(--accent-green); padding-left: 10px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
+th { background-color: var(--bg-th); font-weight: bold; }
+tr:hover { background-color: var(--bg-tr-hover); }
+.loading { text-align: center; padding: 40px; color: var(--text-muted); font-size: 1.2em; }
+.tooltip-wrap { position: relative; display: inline-block; cursor: help; }
+.tooltip-text {
+visibility: hidden; opacity: 0; transition: opacity 0.2s; position: fixed;
+background-color: var(--border-tooltip); color: #fff; text-align: left;
+padding: 12px 16px; border-radius: 8px; font-size: 1rem; font-weight: normal;
+text-transform: none; letter-spacing: 0; line-height: 1.5; white-space: normal;
+width: 300px; max-width: calc(100vw - 32px); z-index: 10000;
+box-shadow: var(--shadow-tooltip); pointer-events: none;
+}
+.tooltip-text.show { visibility: visible; opacity: 1; }
+.tooltip-arrow {
+position: fixed; width: 0; height: 0; border: 7px solid transparent;
+z-index: 10001; pointer-events: none; visibility: hidden; opacity: 0; transition: opacity 0.2s;
+}
+.tooltip-arrow.show { visibility: visible; opacity: 1; }
+.tooltip-arrow.arrow-bottom { border-top-color: var(--border-tooltip); border-bottom: none; }
+.tooltip-arrow.arrow-top { border-bottom-color: var(--border-tooltip); border-top: none; }
+.required-star { color: var(--accent-red); margin-left: 2px; }
+.athlete-highlight { background-color: var(--highlight-bg) !important; }
+.athlete-highlight td.name-col { font-weight: bold; }
 
-    --text-primary: #2c3e50;
-    --text-secondary: #555;
-    --text-muted: #7f8c8d;
-    --text-detail: #2c3e50;
-    --text-label: #34495e;
-    --text-filter-label: #7f8c8d;
-    --text-topbar: #fff;
-    --text-link: #3498db;
-    --text-close: #999;
-    --text-close-hover: #000;
+.no-copy {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
 
-    --border-color: #ddd;
-    --border-light: #eee;
-    --border-input: #ccc;
-    --border-tooltip: #2c3e50;
-
-    --shadow-card: 0 2px 6px rgba(0,0,0,0.08);
-    --shadow-modal: 0 2px 8px rgba(0,0,0,0.1);
-    --shadow-tooltip: 0 4px 16px rgba(0,0,0,0.3);
-    --shadow-dropdown: 0 4px 12px rgba(0,0,0,0.15);
-
-    --highlight-bg: #fff3cd;
-
-    --accent-blue: #3498db;
-    --accent-green: #27ae60;
-    --accent-green-hover: #2ecc71;
-    --accent-red: #e74c3c;
-    --accent-red-hover: #c0392b;
-    --btn-download: #2980b9;
-    --btn-download-hover: #3498db;
-    --pagination-active: #2980b9;
-  }
-
-  /* ===== ТЕМА: ТЁМНАЯ ===== */
-  [data-theme="dark"] {
-    --bg-body: #1a2332;
-    --bg-card: #243447;
-    --bg-topbar: #1a2332;
-    --bg-titlebar: #243447;
-    --bg-filters: #243447;
-    --bg-input: #1a2332;
-    --bg-input-focus: #2a3a4d;
-    --bg-detail: #2a3a4d;
-    --bg-modal-header: #1a2332;
-    --bg-th: #2a3a4d;
-    --bg-tr-hover: #2a3a4d;
-    --bg-pagination-hover: #2a3a4d;
-    --bg-mobile-dropdown: #1a2332;
-
-    --text-primary: #e0e6ed;
-    --text-secondary: #b0b8c4;
-    --text-muted: #8899aa;
-    --text-detail: #d0d8e0;
-    --text-label: #e0e6ed;
-    --text-filter-label: #8899aa;
-    --text-topbar: #e0e6ed;
-    --text-link: #5dade2;
-    --text-close: #8899aa;
-    --text-close-hover: #fff;
-
-    --border-color: #3a4a5d;
-    --border-light: #3a4a5d;
-    --border-input: #3a4a5d;
-    --border-tooltip: #1a2332;
-
-    --shadow-card: 0 2px 8px rgba(0,0,0,0.3);
-    --shadow-modal: 0 4px 16px rgba(0,0,0,0.4);
-    --shadow-tooltip: 0 4px 16px rgba(0,0,0,0.5);
-    --shadow-dropdown: 0 4px 12px rgba(0,0,0,0.4);
-
-    --highlight-bg: #3d3520;
-
-    --accent-blue: #5dade2;
-    --accent-green: #2ecc71;
-    --accent-green-hover: #27ae60;
-    --accent-red: #e74c3c;
-    --accent-red-hover: #c0392b;
-    --btn-download: #2980b9;
-    --btn-download-hover: #3498db;
-    --pagination-active: #2980b9;
-  }
-
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: var(--bg-body);
-    color: var(--text-primary);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
-    transition: background-color 0.3s, color 0.3s;
-  }
-
-  .topbar {
-    width: 100%;
-    background-color: var(--bg-topbar);
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: fixed;
-    top: 0; left: 0; z-index: 20;
-    box-sizing: border-box;
-    height: 60px;
-    transition: background-color 0.3s;
-  }
-  .topbar-title { color: var(--text-topbar); font-weight: bold; font-size: 1.1em; }
-
-  .desktop-menu { display: flex; gap: 4px; margin-left: 20px; }
-  .desktop-menu a {
-    color: var(--text-topbar); text-decoration: none; padding: 8px 12px;
-    border-radius: 4px; font-size: 1em; font-family: inherit; transition: background 0.2s;
-  }
-  .desktop-menu a:hover { background-color: rgba(255,255,255,0.1); }
-
-  /* === Кнопка темы === */
-  .theme-toggle {
-    background: none; border: 1px solid rgba(255,255,255,0.3);
-    color: var(--text-topbar); font-size: 1.2em; cursor: pointer;
-    padding: 4px 10px; border-radius: 8px; transition: background 0.2s, border-color 0.2s;
-    line-height: 1; display: inline-flex; align-items: center; justify-content: center;
-  }
-  .theme-toggle:hover { background-color: rgba(255,255,255,0.1); }
-
-  .topbar-right {
-    display: flex; align-items: center; gap: 10px;
-  }
-
-  .burger-btn { display: none; background: none; border: none; cursor: pointer; padding: 8px; }
-  .burger-btn span { display: block; width: 22px; height: 2px; background-color: var(--text-topbar); margin: 5px 0; transition: 0.3s; }
-
-  .mobile-dropdown {
-    position: absolute; top: 100%; right: 0; background-color: var(--bg-mobile-dropdown);
-    box-shadow: var(--shadow-dropdown); border-radius: 8px;
-    overflow: hidden; min-width: 280px; display: none; flex-direction: column; z-index: 9998;
-  }
-  .mobile-dropdown.active { display: flex !important; }
-  .mobile-link-list a {
-    display: block; padding: 12px 16px; color: var(--text-topbar); text-decoration: none;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-  .mobile-link-list a:last-child { border-bottom: none; }
-  .mobile-link-list a:hover { background-color: rgba(255,255,255,0.1); }
-
-  @media (max-width: 768px) {
-    .burger-btn { display: block; }
-    .desktop-menu { display: none; }
-  }
-
-  .title-bar {
-    display: flex; align-items: center; justify-content: center;
-    width: 100%; padding: 8px 20px; margin-top: 60px;
-    background-color: var(--bg-titlebar); border-bottom: 1px solid var(--border-light); box-sizing: border-box;
-    transition: background-color 0.3s, border-color 0.3s;
-  }
-  .title-bar-label { font-weight: bold; font-size: 1.1em; color: var(--text-primary); white-space: nowrap; }
-
-  .content-wrapper {
-    max-width: 1440px;
-    width: 100%;
-    margin: 0 auto;
-    box-sizing: border-box;
-  }
-
-  .filters-container {
-    padding: 10px 20px; background-color: var(--bg-filters);
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;
-    border-bottom: 1px solid var(--border-light); align-items: end;
-    transition: background-color 0.3s, border-color 0.3s;
-  }
-  .filter-group { display: flex; flex-direction: column; gap: 4px; }
-  .filter-label { font-size: 0.75em; color: var(--text-filter-label); text-transform: uppercase; letter-spacing: 0.5px; }
-  select, input {
-    padding: 6px 10px; border: 1px solid var(--border-input); border-radius: 5px;
-    font-size: 0.85em; background-color: var(--bg-input); color: var(--text-primary); font-family: inherit;
-    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
-  }
-  select:focus, input:focus { outline: none; border-color: var(--accent-blue); background-color: var(--bg-input-focus); }
-
-  .btn-reset {
-    background-color: var(--accent-red); color: white; border: none;
-    padding: 6px 18px; border-radius: 5px; cursor: pointer; font-weight: bold;
-    white-space: nowrap; font-size: 0.85em; font-family: inherit;
-  }
-  .btn-reset:hover { background-color: var(--accent-red-hover); }
-  @media (max-width: 768px) { .btn-reset { grid-column: 1 / -1; text-align: center; padding: 10px; } }
-
-  .main { margin-top: 0; padding: 20px; min-width: 0; box-sizing: border-box; }
-  h2 { margin-top: 0; color: var(--text-label); font-size: 1.15em; }
-
-  .stats-container { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; }
-  @media (min-width: 768px) { .stats-container { grid-template-columns: 1fr 1fr; } }
-
-  .stat-card {
-    background: var(--bg-card); border-radius: 6px; box-shadow: var(--shadow-card);
-    padding: 14px; border-top: 4px solid var(--accent-blue);
-    transition: background-color 0.3s, box-shadow 0.3s;
-  }
-  .stat-card h3 { margin-top: 0; font-size: 1em; color: var(--text-primary); }
-  .stat-list { list-style: none; padding: 0; margin: 8px 0 0 0; }
-  .stat-list li { padding: 5px 6px; border-bottom: 1px dashed var(--border-light); font-size: 0.85em; color: var(--text-secondary); }
-  .stat-list li:last-child { border-bottom: none; }
-  .stat-list a { color: var(--text-link); text-decoration: none; font-weight: 600; }
-  .stat-list a:hover { text-decoration: underline; }
-
-  .events-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 16px;
-  }
-
-  @media (max-width: 1439px) and (min-width: 1100px) {
-    .events-grid { grid-template-columns: repeat(6, 1fr); }
-  }
-  @media (max-width: 1099px) and (min-width: 769px) {
-    .events-grid { grid-template-columns: repeat(4, 1fr); }
-  }
-  @media (max-width: 768px) and (min-width: 560px) {
-    .events-grid { grid-template-columns: repeat(3, 1fr); }
-  }
-  @media (max-width: 559px) and (min-width: 390px) {
-    .events-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 389px) {
-    .events-grid { grid-template-columns: 1fr; }
-  }
-
-  .event-card-compact {
-    background-color: var(--bg-card); border-radius: 6px; box-shadow: var(--shadow-card);
-    overflow: hidden; display: flex; flex-direction: column; min-width: 0;
-    transition: background-color 0.3s, box-shadow 0.3s;
-  }
-  .banner-img-wrapper { height: 110px; width: 100%; position: relative; }
-  .banner-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-  .banner-overlay {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-    padding: 10px; box-sizing: border-box; color: white;
-  }
-  .banner-title { margin: 0; font-size: 0.95em; line-height: 1.3; }
-  .banner-title span { font-size: 0.75em; opacity: 0.9; display: block; margin-top: 3px; }
-  .event-details { padding: 10px; flex: 1; display: flex; flex-direction: column; }
-  .detail-box {
-    background-color: var(--bg-detail); padding: 5px 7px; border-radius: 4px;
-    font-size: 0.78em; margin-bottom: 5px; color: var(--text-detail);
-    transition: background-color 0.3s, color 0.3s;
-  }
-  .detail-box strong { color: var(--text-primary); }
-  
-  .buttons {
-    padding: 12px;
-    border-top: 1px solid var(--border-light);
-    display: flex;
-    gap: 8px;
-    align-items: stretch; 
-    transition: border-color 0.3s;
-  }
-
-  a.btn-download, a.btn-view, button.btn-view {
-    flex: 1;
-    text-align: center;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 40px; 
-    padding: 0; 
-    background-color: var(--btn-download);
-    color: #fff;
-    text-decoration: none;
-    border-radius: 4px;
-    font-size: 0.85em;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background 0.2s;
-  }
-
-  a.btn-download:hover { background-color: var(--btn-download-hover); }
-  a.btn-view:hover, button.btn-view:hover { background-color: var(--accent-green-hover); }
-  a.btn-view { background-color: var(--accent-green); }
-  button.btn-view { background-color: var(--accent-green); border: none; }
-
-  .no-results {
-    display: none; grid-column: 1 / -1; text-align: center;
-    padding: 40px 20px; color: var(--text-secondary); font-size: 1.1em;
-    background-color: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-modal);
-  }
-
-  .pagination-container {
-    margin-top: 25px; text-align: center; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap;
-  }
-  .pagination-container button {
-    padding: 6px 14px; border: 1px solid var(--border-input); border-radius: 5px;
-    background: var(--bg-card); color: var(--text-primary); cursor: pointer; font-family: inherit; font-size: 0.9em; transition: all 0.2s;
-  }
-  .pagination-container button:hover { background: var(--bg-pagination-hover); }
-  .pagination-container button.active {
-    background: var(--pagination-active); color: #fff; border-color: var(--pagination-active);
-  }
-
-  #previewModal {
-    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;
-  }
-  .modal-content {
-    background: var(--bg-card); color: var(--text-primary); width: 90%; max-width: 900px; height: 85vh;
-    border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
-    transition: background-color 0.3s, color 0.3s;
-  }
-  .modal-header {
-    padding: 12px 18px; border-bottom: 1px solid var(--border-light);
-    display: flex; justify-content: space-between; align-items: center; background: var(--bg-modal-header);
-    transition: background-color 0.3s, border-color 0.3s;
-  }
-  .modal-title { margin: 0; font-size: 1.1em; color: var(--text-primary); }
-  .close-btn { background: none; border: none; color: var(--text-close); font-size: 1.5em; cursor: pointer; }
-  .close-btn:hover { color: var(--text-close-hover); }
-  .modal-body { padding: 18px; overflow-y: auto; flex: 1; }
-  .table-wrapper { margin-bottom: 25px; overflow-x: auto; }
-  .table-wrapper h4 {
-    margin-top: 0; margin-bottom: 10px; color: var(--text-primary);
-    border-left: 4px solid var(--accent-green); padding-left: 10px;
-  }
-  table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
-  th { background-color: var(--bg-th); font-weight: bold; }
-  tr:hover { background-color: var(--bg-tr-hover); }
-
-  .loading { text-align: center; padding: 40px; color: var(--text-muted); font-size: 1.2em; }
-
-  /* Tooltip — фиксированное позиционирование через JS */
-  .tooltip-wrap { position: relative; display: inline-block; cursor: help; }
-  .tooltip-text {
-    visibility: hidden; opacity: 0; transition: opacity 0.2s;
-    position: fixed;
-    background-color: var(--border-tooltip); color: #fff; text-align: left;
-    padding: 12px 16px; border-radius: 8px;
-    font-size: 1rem; font-weight: normal;
-    text-transform: none; letter-spacing: 0; line-height: 1.5;
-    white-space: normal; width: 300px; max-width: calc(100vw - 32px);
-    z-index: 10000;
-    box-shadow: var(--shadow-tooltip);
-    pointer-events: none;
-  }
-  .tooltip-text.show { visibility: visible; opacity: 1; }
-  .tooltip-arrow {
-    position: fixed;
-    width: 0; height: 0;
-    border: 7px solid transparent;
-    z-index: 10001;
-    pointer-events: none;
-    visibility: hidden; opacity: 0; transition: opacity 0.2s;
-  }
-  .tooltip-arrow.show { visibility: visible; opacity: 1; }
-  .tooltip-arrow.arrow-bottom { border-top-color: var(--border-tooltip); border-bottom: none; }
-  .tooltip-arrow.arrow-top { border-bottom-color: var(--border-tooltip); border-top: none; }
-  
-  .required-star { color: var(--accent-red); margin-left: 2px; }
-  .athlete-highlight { background-color: var(--highlight-bg) !important; }
-  .athlete-highlight td.name-col { font-weight: bold; }
+@media (max-width: 550px) {
+.pagination-container {
+gap: 5px;
+padding: 0 4px;
+}
+.pagination-container button {
+padding: 7px 10px;
+font-size: 0.85em;
+}
+.pagination-container .page-ellipsis {
+padding: 0 1px;
+}
+}
+@media (max-width: 390px) {
+.pagination-container {
+gap: 4px;
+}
+.pagination-container button {
+padding: 7px 8px;
+font-size: 0.8em;
+}
+.pagination-container button:first-child,
+.pagination-container button:last-child {
+font-size: 0;
+min-width: 36px;
+}
+.pagination-container button:first-child::after {
+content: "\2190";
+font-size: 16px;
+}
+.pagination-container button:last-child::after {
+content: "\2192";
+font-size: 16px;
+}
+}
 </style>
 </head>
 <body>
 
-  <div class="topbar">
-    <span class="topbar-title">Архив протоколов</span>
-    <nav class="desktop-menu">
-      <a href="index.html">Главная</a>
-      <a href="reglament.html">Регламент</a>
-      <a href="athletes.html">Спортсмены</a>
-    </nav>
-    <div class="topbar-right">
-      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Сменить тему">&#127769;</button>
-      <button id="mobileMenuBtn" class="burger-btn" onclick="toggleMobileMenu()">
-        <span></span><span></span><span></span>
-      </button>
-      <div id="mobileDropdown" class="mobile-dropdown">
-        <div class="mobile-link-list">
-          <a href="index.html">Главная</a>
-          <a href="reglament.html">Регламент</a>
-          <a href="athletes.html">Спортсмены</a>
-        </div>
-      </div>
+<div class="topbar">
+<span class="topbar-title">Архив протоколов</span>
+<nav class="desktop-menu">
+<a href="index.html">Главная</a>
+<a href="reglament.html">Регламент</a>
+<a href="athletes.html">Спортсмены</a>
+</nav>
+<div class="topbar-right">
+<button class="theme-toggle" id="themeToggle" title="Сменить тему">&#127769;</button>
+<button id="mobileMenuBtn" class="burger-btn">
+<span></span><span></span><span></span>
+</button>
+<div id="mobileDropdown" class="mobile-dropdown">
+<div class="mobile-link-list">
+<a href="index.html">Главная</a>
+<a href="reglament.html">Регламент</a>
+<a href="athletes.html">Спортсмены</a>
+</div>
+</div>
+</div>
+</div>
+
+<div class="content-wrapper">
+<div class="title-bar"><span class="title-bar-label">Архив протоколов</span></div>
+
+<div class="filters-container">
+<div class="filter-group">
+<label class="filter-label" for="filter-year">Период</label>
+<select id="filter-year">
+<option value="">Все периоды</option>
+<option value="2025-2026">2025–2026</option>
+<option value="2023-2024">2023–2024</option>
+<option value="2020-2022">2020–2022</option>
+<option value="2015-2019">2015–2019</option>
+<option value="2010-2014">2010–2014</option>
+<option value="2005-2009">2005–2009</option>
+<option value="2000-2004">2000–2004</option>
+<option value="1990-1999">1990–1999</option>
+</select>
+</div>
+<div class="filter-group">
+<label class="filter-label" for="filter-discipline">Дисциплина</label>
+<select id="filter-discipline">
+<option value="">Любая дисциплина</option>
+<option value="эстафета">эстафета</option>
+<option value="3-борье с лыжной гонкой">3-борье с лыжной гонкой</option>
+<option value="3-борье с лыжероллерной гонкой">3-борье с лыжероллерной гонкой</option>
+<option value="3-борье с плаванием">3-борье с плаванием</option>
+<option value="3-борье с бегом">3-борье с бегом</option>
+<option value="4-борье с бегом">4-борье с бегом</option>
+<option value="5-борье с бегом">5-борье с бегом</option>
+</select>
+</div>
+<div class="filter-group">
+<label class="filter-label" for="filter-age">Возрастная группа</label>
+<select id="filter-age">
+<option value="">Все группы</option>
+<option value="Мужчины(Женщины)">Мужчины(Женщины)</option>
+<option value="Студенты 17-25">Студенты 17-25</option>
+<option value="Юниоры(Юниорки) 21-23">Юниоры(Юниорки) 21-23</option>
+<option value="Юниоры(Юниорки) 18-20">Юниоры(Юниорки) 18-20</option>
+<option value="Юноши(Девушки) 16-17">Юноши(Девушки) 16-17</option>
+<option value="Юноши(Девушки) 14-15">Юноши(Девушки) 14-15</option>
+<option value="Юноши(Девушки) 12-13">Юноши(Девушки) 12-13</option>
+<option value="Ветераны">Ветераны</option>
+</select>
+</div>
+<div class="filter-group">
+<label class="filter-label" for="filter-event">Соревнования</label>
+<select id="filter-event">
+<option value="">Все соревнования</option>
+<option value="Чемпионат Мира">Чемпионат Мира</option>
+<option value="Первенство Мира">Первенство Мира</option>
+<option value="Кубок Мира">Кубок Мира</option>
+<option value="Чемпионат России">Чемпионат России</option>
+<option value="Первенство России">Первенство России</option>
+<option value="Кубок России">Кубок России</option>
+<option value="Всероссийские соревнования">Всероссийские соревнования</option>
+</select>
+</div>
+<div class="filter-group">
+<label class="filter-label" for="filter-athlete">
+<span class="tooltip-wrap" id="athleteTooltipWrap">Спортсмены<span class="required-star">*</span></span>
+</label>
+<input type="text" id="filter-athlete" placeholder="Имя или фамилия" />
+</div>
+<button class="btn-reset" id="btnReset">Сбросить</button>
+</div>
+
+<div class="main">
+<div class="stats-container">
+<div class="stat-card">
+<h3>Актуальное</h3>
+<ul class="stat-list" id="recentList"></ul>
+</div>
+<div class="stat-card">
+<h3>Рекомендуем</h3>
+<ul class="stat-list" id="topViewedList"></ul>
+</div>
+</div>
+<h2>Результаты поиска</h2>
+<div class="events-grid" id="eventsGrid">
+<div class="loading">Загрузка данных...</div>
+</div>
+<div class="no-results" id="noResults">Ничего не найдено. Попробуйте изменить фильтры.</div>
+<div class="pagination-container" id="pagination"></div>
+</div>
+</div>
+
+<div class="tooltip-text" id="athleteTooltip">Введите имя или фамилию спортсмена для поиска и фильтрации соревнований. В быстром просмотре совпавшие строки подсвечиваются</div>
+<div class="tooltip-arrow" id="athleteTooltipArrow"></div>
+
+<div id="previewModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h4 class="modal-title" id="modalTitle">Результаты</h4>
+      <div id="modalHeaderActions"></div> 
+      <button class="close-btn" id="closeModalBtn">&times;</button>
     </div>
+    <div class="modal-body" id="modalBody"></div>
   </div>
-
-  <div class="content-wrapper">
-    <div class="title-bar">
-      <span class="title-bar-label">Архив протоколов</span>
-    </div>
-
-    <div class="filters-container">
-      <div class="filter-group">
-        <label class="filter-label">Период</label>
-        <select id="filter-year" onchange="applyFilters()">
-          <option value="">Все периоды</option>
-          <option value="2025-2026">2025–2026</option>
-          <option value="2023-2024">2023–2024</option>
-          <option value="2020-2022">2020–2022</option>
-          <option value="2015-2019">2015–2019</option>
-          <option value="2010-2014">2010–2014</option>
-          <option value="2005-2009">2005–2009</option>
-          <option value="2000-2004">2000–2004</option>
-          <option value="1990-1999">1990–1999</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Дисциплина</label>
-        <select id="filter-discipline" onchange="applyFilters()">
-          <option value="">Любая дисциплина</option>
-          <option value="эстафета">эстафета</option>
-          <option value="3-борье с лыжной гонкой">3-борье с лыжной гонкой</option>
-          <option value="3-борье с лыжероллерной гонкой">3-борье с лыжероллерной гонкой</option>
-          <option value="3-борье с плаванием">3-борье с плаванием</option>
-          <option value="3-борье с бегом">3-борье с бегом</option>
-          <option value="4-борье с бегом">4-борье с бегом</option>
-          <option value="5-борье с бегом">5-борье с бегом</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Возрастная группа</label>
-        <select id="filter-age" onchange="applyFilters()">
-          <option value="">Все группы</option>
-          <option value="Мужчины(Женщины)">Мужчины(Женщины)</option>
-	  <option value="Студенты 17-25">Студенты 17-25</option>
-          <option value="Юниоры(Юниорки) 21-22">Юниоры(Юниорки) 21-22</option>
-          <option value="Юниоры(Юниорки) 18-20">Юниоры(Юниорки) 18-20</option>
-          <option value="Юноши(Девушки) 16-17">Юноши(Девушки) 16-17</option>
-          <option value="Юноши(Девушки) 14-15">Юноши(Девушки) 14-15</option>
-          <option value="Юноши(Девушки) 12-13">Юноши(Девушки) 12-13</option>
-	  <option value="Ветераны">Ветераны</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Соревнования</label>
-        <select id="filter-event" onchange="applyFilters()">
-          <option value="">Все соревнования</option>
-          <option value="Чемпионат Мира">Чемпионат Мира</option>
-          <option value="Первенство Мира">Первенство Мира</option>
-          <option value="Кубок Мира">Кубок Мира</option>
-          <option value="Чемпионат России">Чемпионат России</option>
-          <option value="Первенство России">Первенство России</option>
-          <option value="Кубок России">Кубок России</option>
-          <option value="Всероссийские соревнования">Всероссийские соревнования</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">
-          <span class="tooltip-wrap" id="athleteTooltipWrap">Спортсмены (топ-5)<span class="required-star">*</span></span>
-        </label>
-        <input type="text" id="filter-athlete" placeholder="Имя или фамилия" oninput="applyFilters()" />
-      </div>
-      <button class="btn-reset" onclick="resetFilters()">Сбросить</button>
-    </div>
-
-    <div class="main">
-      <div class="stats-container">
-        <div class="stat-card">
-          <h3>Актуальное</h3>
-          <ul class="stat-list" id="recentList"></ul>
-        </div>
-        <div class="stat-card">
-          <h3>Рекомендуем</h3>
-          <ul class="stat-list" id="topViewedList"></ul>
-        </div>
-      </div>
-
-      <h2>Результаты поиска</h2>
-      <div class="events-grid" id="eventsGrid">
-        <div class="loading">Загрузка данных...</div>
-      </div>
-      <div class="no-results" id="noResults">
-        Ничего не найдено. Попробуйте изменить фильтры.
-      </div>
-      <div class="pagination-container" id="pagination"></div>
-    </div>
-  </div>
-
-  <!-- Tooltip elements (fixed position, positioned by JS) -->
-  <div class="tooltip-text" id="athleteTooltip">Введите имя или фамилию спортсмена для поиска и фильтрации соревнований. В быстром просмотре совпавшие строки подсвечиваются</div>
-  <div class="tooltip-arrow" id="athleteTooltipArrow"></div>
-
-  <div id="previewModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title" id="modalTitle">Результаты</h4>
-        <button class="close-btn" onclick="closeModal()">&times;</button>
-      </div>
-      <div class="modal-body" id="modalBody"></div>
-    </div>
-  </div>
+</div>
 
 <script>
-  // ===== ПЕРЕКЛЮЧЕНИЕ ТЕМЫ =====
-  function toggleTheme() {
-    var current = document.documentElement.getAttribute('data-theme');
-    var next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-    updateThemeButton(next);
-  }
+(function() {
+'use strict';
 
-  function updateThemeButton(theme) {
-    var btn = document.getElementById('themeToggle');
-    if (btn) {
-      btn.innerHTML = theme === 'dark' ? '&#9728;' : '&#127769;';
-    }
-  }
+function toggleTheme() {
+var current = document.documentElement.getAttribute('data-theme');
+var next = current === 'dark' ? 'light' : 'dark';
+document.documentElement.setAttribute('data-theme', next);
+localStorage.setItem('theme', next);
+updateThemeButton(next);
+}
+function updateThemeButton(theme) {
+var btn = document.getElementById('themeToggle');
+if (btn) btn.innerHTML = theme === 'dark' ? '&#9728;' : '&#127769;';
+}
+(function initTheme() {
+var saved = localStorage.getItem('theme');
+if (saved) { document.documentElement.setAttribute('data-theme', saved); updateThemeButton(saved); }
+else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+document.documentElement.setAttribute('data-theme', 'dark'); updateThemeButton('dark');
+}
+})();
 
-  (function() {
-    var saved = localStorage.getItem('theme');
-    if (saved) {
-      document.documentElement.setAttribute('data-theme', saved);
-      updateThemeButton(saved);
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      updateThemeButton('dark');
-    }
-  })();
+var metaEvents = [];
+var filteredEvents = [];
+var currentAthleteQuery = "";
+var currentPage = 1;
+var itemsPerPage = 12;
+var tablesCache = {};
+var fullDataMode = false;
 
-  var allEvents = [];
-  var filteredEvents = [];
-  var currentAthleteQuery = "";
-  var currentPage = 1;
-  var itemsPerPage = 12;
+var DEFAULT_COLUMNS = [
+{key: "p", label: "Место"}, {key: "n", label: "Имя Фамилия"},
+{key: "y", label: "Год рожд."}, {key: "c", label: "Страна(Субъект)"},
+{key: "s", label: "Стрельба"}, {key: "st", label: "Силовая"},
+{key: "r", label: "Гонка"}, {key: "t", label: "Сумма"}
+];
 
-  var DEFAULT_COLUMNS = [
-    {key: "p",  label: "Место"},
-    {key: "n",  label: "Имя Фамилия"},
-    {key: "y",  label: "Год рожд."},
-    {key: "c",  label: "Страна(Субъект)"},
-    {key: "s",  label: "Стрельба"},
-    {key: "st", label: "Силовая"},
-    {key: "r",  label: "Гонка"},
-    {key: "t",  label: "Сумма"}
-  ];
+(function initTooltip() {
+var wrap = document.getElementById('athleteTooltipWrap');
+var tip = document.getElementById('athleteTooltip');
+var arrow = document.getElementById('athleteTooltipArrow');
+if (!wrap || !tip || !arrow) return;
+function showTip() { tip.classList.add('show'); arrow.classList.add('show'); positionTip(); }
+function hideTip() { tip.classList.remove('show'); arrow.classList.remove('show'); }
+function positionTip() {
+var rect = wrap.getBoundingClientRect(), tipRect = tip.getBoundingClientRect();
+var vw = window.innerWidth, vh = window.innerHeight, margin = 16, gap = 8;
+var placeBelow = true, spaceBelow = vh - rect.bottom, spaceAbove = rect.top;
+if (spaceBelow < tipRect.height + gap + margin && spaceAbove > tipRect.height + gap + margin) placeBelow = false;
+var top, tooltipBg = getComputedStyle(document.documentElement).getPropertyValue('--border-tooltip').trim();
+if (placeBelow) {
+top = rect.bottom + gap; arrow.className = 'tooltip-arrow arrow-top show';
+arrow.style.borderBottomColor = tooltipBg; arrow.style.borderTopColor = '';
+} else {
+top = rect.top - tipRect.height - gap; arrow.className = 'tooltip-arrow arrow-bottom show';
+arrow.style.borderTopColor = tooltipBg; arrow.style.borderBottomColor = '';
+}
+var tipWidth = tipRect.width;
+var left = Math.max(margin, rect.left + rect.width / 2 - tipWidth / 2);
+if (left + tipWidth > vw - margin) left = vw - margin - tipWidth;
+if (left < margin) left = margin;
+tip.style.left = left + 'px'; tip.style.top = top + 'px';
+var arrowLeft = rect.left + rect.width / 2 - 7;
+arrowLeft = Math.max(left + 10, Math.min(arrowLeft, left + tipWidth - 20));
+arrow.style.left = arrowLeft + 'px';
+arrow.style.top = placeBelow ? (top - 7) + 'px' : (top + tipRect.height) + 'px';
+}
+wrap.addEventListener('mouseenter', showTip);
+wrap.addEventListener('mouseleave', hideTip);
+wrap.addEventListener('focus', showTip);
+wrap.addEventListener('blur', hideTip);
+window.addEventListener('scroll', function() { if (tip.classList.contains('show')) positionTip(); }, true);
+window.addEventListener('resize', function() { if (tip.classList.contains('show')) positionTip(); });
+})();
 
-  // ===== Tooltip positioning =====
-  (function() {
-    var wrap = document.getElementById('athleteTooltipWrap');
-    var tip = document.getElementById('athleteTooltip');
-    var arrow = document.getElementById('athleteTooltipArrow');
-    
-    function showTip() {
-      tip.classList.add('show');
-      arrow.classList.add('show');
-      positionTip();
-    }
-    function hideTip() {
-      tip.classList.remove('show');
-      arrow.classList.remove('show');
-    }
-    
-    function positionTip() {
-      var rect = wrap.getBoundingClientRect();
-      var tipRect = tip.getBoundingClientRect();
-      var vw = window.innerWidth;
-      var vh = window.innerHeight;
-      var margin = 16;
-      var gap = 8;
-      
-      var placeBelow = true;
-      var spaceBelow = vh - rect.bottom;
-      var spaceAbove = rect.top;
-      
-      if (spaceBelow < tipRect.height + gap + margin && spaceAbove > tipRect.height + gap + margin) {
-        placeBelow = false;
-      }
-      
-      var top;
-      var tooltipBg = getComputedStyle(document.documentElement).getPropertyValue('--border-tooltip').trim();
-      if (placeBelow) {
-        top = rect.bottom + gap;
-        arrow.className = 'tooltip-arrow arrow-top show';
-        arrow.style.borderTopColor = '';
-        arrow.style.borderBottomColor = tooltipBg;
-      } else {
-        top = rect.top - tipRect.height - gap;
-        arrow.className = 'tooltip-arrow arrow-bottom show';
-        arrow.style.borderTopColor = tooltipBg;
-        arrow.style.borderBottomColor = '';
-      }
-      
-      var tipWidth = tipRect.width;
-      var preferredLeft = rect.left + rect.width / 2 - tipWidth / 2;
-      
-      var left = Math.max(margin, preferredLeft);
-      if (left + tipWidth > vw - margin) {
-        left = vw - margin - tipWidth;
-      }
-      if (left < margin) left = margin;
-      
-      tip.style.left = left + 'px';
-      tip.style.top = top + 'px';
-      
-      var arrowLeft = rect.left + rect.width / 2 - 7;
-      arrowLeft = Math.max(left + 10, Math.min(arrowLeft, left + tipWidth - 20));
-      arrow.style.left = arrowLeft + 'px';
-      
-      if (placeBelow) {
-        arrow.style.top = (top - 7) + 'px';
-      } else {
-        arrow.style.top = (top + tipRect.height) + 'px';
-      }
-    }
-    
-    wrap.addEventListener('mouseenter', showTip);
-    wrap.addEventListener('mouseleave', hideTip);
-    wrap.addEventListener('focus', showTip);
-    wrap.addEventListener('blur', hideTip);
-    window.addEventListener('scroll', function() {
-      if (tip.classList.contains('show')) positionTip();
-    }, true);
-    window.addEventListener('resize', function() {
-      if (tip.classList.contains('show')) positionTip();
-    });
-  })();
+function debounce(func, wait) {
+var timeout;
+return function() {
+var context = this, args = arguments;
+var later = function() { clearTimeout(timeout); func.apply(context, args); };
+clearTimeout(timeout);
+timeout = setTimeout(later, wait);
+};
+}
+var applyFiltersDebounced = debounce(applyFilters, 400);
 
-  async function loadData() {
+async function loadData() {
+try {
+var res = await fetch('events-meta.json?v=' + Date.now());
+if (res.ok) {
+metaEvents = await res.json();
+fullDataMode = false;
+} else {
+var res2 = await fetch('events.json?v=' + Date.now());
+if (!res2.ok) throw new Error('HTTP ' + res2.status);
+metaEvents = await res2.json();
+fullDataMode = true;
+metaEvents.forEach(function(e) { if (e.tables) tablesCache[e.key] = e.tables; });
+}
+metaEvents.sort(function(a, b) { return b.year - a.year; });
+renderRecent();
+renderTopViewed();
+applyFilters();
+} catch(e) {
+document.getElementById('eventsGrid').innerHTML =
+'<div class="no-results" style="display:block;">Ошибка загрузки (' + e.message + ').<br>' +
+'Запусти: <code>python -m http.server</code> и открой http://localhost:8000</div>';
+}
+}
+
+function renderRecent() {
+var list = document.getElementById('recentList');
+list.innerHTML = '';
+metaEvents.slice(0, 4).forEach(function(e) {
+var li = document.createElement('li');
+li.innerHTML = '<a href="#" data-key="' + e.key + '">' + e.title + ' — ' + (e.subtitle || '') + '</a>';
+list.appendChild(li);
+});
+}
+function renderTopViewed() {
+var list = document.getElementById('topViewedList');
+list.innerHTML = '';
+var featured = metaEvents.filter(function(e) { return e.featured === true; });
+if (featured.length === 0) featured = metaEvents.slice(4, 8);
+featured.slice(0, 4).forEach(function(e) {
+var li = document.createElement('li');
+li.innerHTML = '<a href="#" data-key="' + e.key + '">' + e.title + ' — ' + (e.subtitle || '') + '</a>';
+list.appendChild(li);
+});
+}
+
+function matchAthlete(query, name) {
+if (!query || !name) return false;
+var q = query.toLowerCase().trim(), n = name.toLowerCase().trim();
+if (!q || !n) return false;
+var qTokens = q.split(/\s+/).filter(function(t) { return t.length > 0; });
+var nTokens = n.split(/\s+/).filter(function(t) { return t.length > 0; });
+for (var i = 0; i < qTokens.length; i++) {
+var found = false;
+for (var j = 0; j < nTokens.length; j++) {
+if (nTokens[j].indexOf(qTokens[i]) !== -1 || qTokens[i].indexOf(nTokens[j]) !== -1) { found = true; break; }
+}
+if (!found) return false;
+}
+return true;
+}
+
+function eventMatchesAthlete(event, query) {
+if (!query) return false;
+if (tablesCache[event.key]) {
+var tables = tablesCache[event.key];
+for (var i = 0; i < tables.length; i++) {
+var rows = tables[i].rows;
+if (!rows) continue;
+for (var j = 0; j < rows.length; j++) if (matchAthlete(query, rows[j].n)) return true;
+}
+return false;
+}
+if (event.athletes) {
+for (var k = 0; k < event.athletes.length; k++) if (matchAthlete(query, event.athletes[k])) return true;
+return false;
+}
+if (fullDataMode && event.tables) {
+for (var i2 = 0; i2 < event.tables.length; i2++) {
+var rows2 = event.tables[i2].rows;
+if (!rows2) continue;
+for (var j2 = 0; j2 < rows2.length; j2++) if (matchAthlete(query, rows2[j2].n)) return true;
+}
+}
+return false;
+}
+
+function applyFilters() {
+var fYear = document.getElementById('filter-year').value;
+var fDisc = document.getElementById('filter-discipline').value;
+var fAge = document.getElementById('filter-age').value;
+var fEvent = document.getElementById('filter-event').value;
+var fAthlete = document.getElementById('filter-athlete').value;
+currentAthleteQuery = fAthlete.trim();
+
+filteredEvents = metaEvents.filter(function(card) {
+var matchYear = true;
+if (fYear !== '') {
+var cardYear = parseInt(card.year, 10);
+if (fYear.indexOf('-') !== -1) {
+var parts = fYear.split('-');
+matchYear = (cardYear >= parseInt(parts[0], 10) && cardYear <= parseInt(parts[1], 10));
+} else matchYear = (String(card.year) === fYear);
+}
+var matchDisc = (fDisc === '');
+if (fDisc !== '' && card.discipline) {
+if (card.discipline.split(';').map(function(d) { return d.trim(); }).indexOf(fDisc) !== -1) matchDisc = true;
+}
+var matchEvent = (fEvent === '');
+if (fEvent !== '' && card.event) {
+if (card.event.split(';').map(function(ev) { return ev.trim(); }).indexOf(fEvent) !== -1) matchEvent = true;
+}
+var matchAge = (fAge === '');
+if (fAge !== '' && card.age) {
+if (card.age.split(';').map(function(a) { return a.trim(); }).indexOf(fAge) !== -1) matchAge = true;
+}
+var matchAthleteFlag = true;
+if (fAthlete !== '') matchAthleteFlag = eventMatchesAthlete(card, fAthlete);
+return matchYear && matchDisc && matchAge && matchEvent && matchAthleteFlag;
+});
+
+filteredEvents.sort(function(a, b) { return b.year - a.year; });
+currentPage = 1;
+renderPage();
+}
+
+function getTotalPages() {
+return Math.ceil(filteredEvents.length / itemsPerPage);
+}
+
+function getPageNumbers(current, total) {
+var result = [];
+if (total <= 7) { for (var i = 1; i <= total; i++) result.push(i); return result; }
+result.push(1);
+if (current > 3) result.push('...');
+for (var i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) result.push(i);
+if (current < total - 2) result.push('...');
+result.push(total);
+return result;
+}
+
+function renderPagination() {
+var totalPages = getTotalPages();
+var container = document.getElementById('pagination');
+container.innerHTML = '';
+if (totalPages <= 1) return;
+
+var btnPrev = document.createElement('button');
+btnPrev.innerHTML = '&#8592; Назад';
+btnPrev.disabled = (currentPage === 1);
+btnPrev.onclick = function() { changePage(currentPage - 1); };
+container.appendChild(btnPrev);
+
+getPageNumbers(currentPage, totalPages).forEach(function(item) {
+if (item === '...') {
+var span = document.createElement('span');
+span.className = 'page-ellipsis';
+span.textContent = '...';
+container.appendChild(span);
+} else {
+var btn = document.createElement('button');
+btn.textContent = item;
+if (item === currentPage) btn.className = 'active';
+btn.onclick = function() { changePage(item); };
+container.appendChild(btn);
+}
+});
+
+var btnNext = document.createElement('button');
+btnNext.innerHTML = 'Вперёд &#8594;';
+btnNext.disabled = (currentPage === totalPages);
+btnNext.onclick = function() { changePage(currentPage + 1); };
+container.appendChild(btnNext);
+}
+
+function changePage(page) {
+currentPage = page;
+renderPage();
+window.scrollTo({ top: document.querySelector('.main').offsetTop - 80, behavior: 'smooth' });
+}
+
+function renderPage() {
+var grid = document.getElementById('eventsGrid');
+var noResults = document.getElementById('noResults');
+grid.innerHTML = '';
+
+if (filteredEvents.length === 0) {
+noResults.style.display = 'block';
+document.getElementById('pagination').innerHTML = '';
+return;
+}
+noResults.style.display = 'none';
+
+var start = (currentPage - 1) * itemsPerPage;
+var end = Math.min(start + itemsPerPage, filteredEvents.length);
+var pageItems = filteredEvents.slice(start, end);
+
+var fragment = document.createDocumentFragment();
+
+pageItems.forEach(function(e) {
+var card = document.createElement('div');
+card.className = 'event-card-compact';
+var ageDisplay = (e.age || '').split(';').join(', ');
+var imgSrc = e.img || 'files/placeholder.png';
+card.innerHTML =
+'<div class="banner-img-wrapper">' +
+'<img src="' + imgSrc + '" alt="' + e.title + '" onerror="this.src=\'files/placeholder.png\'" />' +
+'<div class="banner-overlay"><h3 class="banner-title">' + e.title + '<span>' + (e.subtitle || '') + '</span></h3></div>' +
+'</div>' +
+'<div class="event-details">' +
+'<div class="detail-box"><strong>Дисциплина:</strong> ' + (e.discipline || '-') + '</div>' +
+'<div class="detail-box"><strong>Возрастные группы:</strong> ' + ageDisplay + '</div>' +
+'</div>' +
+'<div class="buttons">' +
+'<a href="' + (e.pdf || '#') + '" download class="btn-download">Скачать</a>' +
+'<button class="btn-view" data-key="' + e.key + '">БЫСТРЫЙ ПРОСМОТР</button>' +
+'</div>';
+fragment.appendChild(card);
+});
+
+grid.appendChild(fragment);
+renderPagination();
+}
+
+function resetFilters() {
+document.getElementById('filter-year').value = '';
+document.getElementById('filter-discipline').value = '';
+document.getElementById('filter-age').value = '';
+document.getElementById('filter-event').value = '';
+document.getElementById('filter-athlete').value = '';
+currentAthleteQuery = '';
+applyFilters();
+}
+
+function attachCopyProtection(el) {
+el.classList.add('no-copy');
+el.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+el.addEventListener('copy', function(e) { e.preventDefault(); return false; });
+el.addEventListener('cut', function(e) { e.preventDefault(); return false; });
+el.addEventListener('dragstart', function(e) { e.preventDefault(); return false; });
+}
+
+function buildTable(group, rows, columns) {
+if (!columns || columns.length === 0) columns = DEFAULT_COLUMNS;
+var html = '<div class="table-wrapper no-copy"><h4 style="display:flex;justify-content:space-between;align-items:center;margin:0 0 12px 0;">' +
+'<span>' + group + '</span>' +
+'</h4><table><thead><tr>';
+columns.forEach(function(col) { html += '<th>' + (col.label || col.key) + '</th>'; });
+html += '</tr></thead><tbody>';
+if (rows) {
+rows.forEach(function(r) {
+html += '<tr>';
+columns.forEach(function(col) {
+var val = r[col.key];
+if (val === undefined || val === null || val === '') val = '-';
+html += col.key === 't' ? '<td><strong>' + val + '</strong></td>' : '<td>' + val + '</td>';
+});
+html += '</tr>';
+});
+}
+html += '</tbody></table></div>';
+return html;
+}
+
+async function openModal(key) {
+  var data = metaEvents.find(function(e) { return e.key === key; });
+  if (!data) return;
+
+  document.getElementById('modalTitle').textContent = data.title + (data.subtitle ? ' — ' + data.subtitle : '');
+  
+  document.getElementById('modalHeaderActions').innerHTML = ''; 
+  document.getElementById('modalBody').innerHTML = '<div class="modal-loading">Загрузка таблиц...</div>';
+  document.getElementById('previewModal').style.display = 'flex';
+
+  var tables = null;
+  if (tablesCache[key]) {
+    tables = tablesCache[key];
+  } else if (fullDataMode && data.tables) {
+    tables = data.tables;
+    tablesCache[key] = tables;
+  } else {
     try {
-      var res = await fetch('events.json?v=' + Date.now());
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      allEvents = await res.json();
-      allEvents.sort(function(a, b) { return b.year - a.year; });
-      renderRecent();
-      renderTopViewed();
-      applyFilters();
-    } catch(e) {
-      document.getElementById('eventsGrid').innerHTML =
-        '<div class="no-results" style="display:block;">Ошибка загрузки events.json (' + e.message + ').<br>' +
-        'Если файл открыт локально (file://), нужен локальный сервер. <br>' +
-        'Запусти: <code>python -m http.server</code> в папке проекта и открой http://localhost:8000</div>';
-    }
-  }
-
-  function renderRecent() {
-    var list = document.getElementById('recentList');
-    list.innerHTML = '';
-    var recent = allEvents.slice(0, 4);
-    recent.forEach(function(e) {
-      var li = document.createElement('li');
-      li.innerHTML = '<a href="#" onclick="openModal(\'' + e.key + '\'); return false;">'
-        + e.title + ' — ' + (e.subtitle || '') + '</a>';
-      list.appendChild(li);
-    });
-  }
-
-  function renderTopViewed() {
-    var list = document.getElementById('topViewedList');
-    list.innerHTML = '';
-    var featured = allEvents.filter(function(e) { return e.featured === true; });
-    if (featured.length === 0) {
-      featured = allEvents.slice(4, 8);
-    }
-    featured.slice(0, 4).forEach(function(e) {
-      var li = document.createElement('li');
-      li.innerHTML = '<a href="#" onclick="openModal(\'' + e.key + '\'); return false;">'
-        + e.title + ' — ' + (e.subtitle || '') + '</a>';
-      list.appendChild(li);
-    });
-  }
-
-  function matchAthlete(query, name) {
-    if (!query || !name) return false;
-    var q = query.toLowerCase().trim();
-    var n = name.toLowerCase().trim();
-    if (!q || !n) return false;
-    var qTokens = q.split(/\s+/).filter(function(t) { return t.length > 0; });
-    var nTokens = n.split(/\s+/).filter(function(t) { return t.length > 0; });
-    for (var i = 0; i < qTokens.length; i++) {
-      var found = false;
-      for (var j = 0; j < nTokens.length; j++) {
-        if (nTokens[j].indexOf(qTokens[i]) !== -1 || qTokens[i].indexOf(nTokens[j]) !== -1) {
-          found = true;
-          break;
-        }
+      var res = await fetch('data/' + key + '.json?v=' + Date.now());
+      if (res.ok) {
+        var tData = await res.json();
+        tables = tData.tables || tData;
+        tablesCache[key] = tables;
+        var keys = Object.keys(tablesCache);
+        if (keys.length > 20) keys.slice(0, keys.length - 20).forEach(function(k) { if (k !== key) delete tablesCache[k]; });
       }
-      if (!found) return false;
-    }
-    return true;
+    } catch(e) {}
   }
 
-  function eventMatchesAthlete(event, query) {
-    if (!query || !event.tables) return false;
-    for (var i = 0; i < event.tables.length; i++) {
-      var rows = event.tables[i].rows;
-      if (!rows) continue;
-      for (var j = 0; j < rows.length; j++) {
-        if (matchAthlete(query, rows[j].n)) return true;
-      }
-    }
-    return false;
+  if (!tables || tables.length === 0) {
+    document.getElementById('modalBody').innerHTML = '<div class="modal-loading">Таблицы не найдены.</div>';
+    return;
   }
 
-  function applyFilters() {
-    var fYear = document.getElementById('filter-year').value;
-    var fDisc = document.getElementById('filter-discipline').value;
-    var fAge  = document.getElementById('filter-age').value;
-    var fEvent = document.getElementById('filter-event').value;
-    var fAthlete = document.getElementById('filter-athlete').value;
-    currentAthleteQuery = fAthlete.trim();
-
-    filteredEvents = allEvents.filter(function(card) {
-      var matchYear = true;
-      if (fYear !== '') {
-        var cardYear = parseInt(card.year, 10);
-        if (fYear.indexOf('-') !== -1) {
-          var parts = fYear.split('-');
-          var startYear = parseInt(parts[0], 10);
-          var endYear = parseInt(parts[1], 10);
-          matchYear = (cardYear >= startYear && cardYear <= endYear);
-        } else {
-          matchYear = (String(card.year) === fYear);
-        }
-      }
-
-      var matchDisc = (fDisc === '');
-      if (fDisc !== '' && card.discipline) {
-        var discs = card.discipline.split(';').map(function(d) { return d.trim(); });
-        if (discs.indexOf(fDisc) !== -1) matchDisc = true;
-      }
-
-      var matchEvent = (fEvent === '');
-      if (fEvent !== '' && card.event) {
-        var events = card.event.split(';').map(function(ev) { return ev.trim(); });
-        if (events.indexOf(fEvent) !== -1) matchEvent = true;
-      }
-
-      var matchAge = (fAge === '');
-      if (fAge !== '' && card.age) {
-        var ages = card.age.split(';').map(function(a) { return a.trim(); });
-        if (ages.indexOf(fAge) !== -1) matchAge = true;
-      }
-
-      var matchAthleteFlag = true;
-      if (fAthlete !== '') {
-        matchAthleteFlag = eventMatchesAthlete(card, fAthlete);
-      }
-      return matchYear && matchDisc && matchAge && matchEvent && matchAthleteFlag;
-    });
-
-    filteredEvents.sort(function(a, b) { return b.year - a.year; });
-
-    currentPage = 1;
-    renderPage();
+  var pdfUrl = data.pdf || '';
+  
+  if (pdfUrl) {
+    var btnHtml = '<a href="' + pdfUrl + '" download class="btn-download" style="padding: 8px 16px; font-size: 0.9em; min-height: auto; margin-left: 15px;">Скачать PDF</a>';
+    document.getElementById('modalHeaderActions').innerHTML = btnHtml;
   }
 
-  function renderPage() {
-    var grid = document.getElementById('eventsGrid');
-    var noResults = document.getElementById('noResults');
-    grid.innerHTML = '';
+  var bodyHtml = ''; 
+  tables.forEach(function(t) {
+    bodyHtml += buildTable(t.group, t.rows, t.columns);
+  });
+  document.getElementById('modalBody').innerHTML = bodyHtml;
 
-    if (filteredEvents.length === 0) {
-      noResults.style.display = 'block';
-      document.getElementById('pagination').innerHTML = '';
-      return;
-    }
-    noResults.style.display = 'none';
-
-    var start = (currentPage - 1) * itemsPerPage;
-    var end = start + itemsPerPage;
-    var eventsToShow = filteredEvents.slice(start, end);
-
-    eventsToShow.forEach(function(e) {
-      var card = document.createElement('div');
-      card.className = 'event-card-compact';
-
-      var ageDisplay = (e.age || '').split(';').join(', ');
-      var imgSrc = e.img || 'files/placeholder.png';
-
-      card.innerHTML =
-        '<div class="banner-img-wrapper">' +
-          '<img src="' + imgSrc + '" alt="' + e.title + '" onerror="this.src=\'files/placeholder.png\'" />' +
-          '<div class="banner-overlay">' +
-            '<h3 class="banner-title">' + e.title + '<span>' + (e.subtitle || '') + '</span></h3>' +
-          '</div>' +
-        '</div>' +
-        '<div class="event-details">' +
-          '<div class="detail-box"><strong>Дисциплина:</strong> ' + (e.discipline || '-') + '</div>' +
-          '<div class="detail-box"><strong>Возрастные группы:</strong> ' + ageDisplay + '</div>' +
-        '</div>' +
-        '<div class="buttons">' +
-          '<a href="' + (e.pdf || '#') + '" download class="btn-download">Скачать</a>' +
-          '<button class="btn-view" onclick="openModal(\'' + e.key + '\')">БЫСТРЫЙ ПРОСМОТР</button>' +
-        '</div>';
-
-      grid.appendChild(card);
-    });
-
-    renderPagination();
-  }
-
-  function renderPagination() {
-    var totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
-    var container = document.getElementById('pagination');
-    container.innerHTML = '';
-
-    if (totalPages <= 1) return;
-
-    if (currentPage > 1) {
-      container.innerHTML += '<button onclick="changePage(' + (currentPage - 1) + ')">&#8592; Назад</button>';
-    }
-
-    for (var i = 1; i <= totalPages; i++) {
-      var activeClass = i === currentPage ? ' class="active"' : '';
-      container.innerHTML += '<button' + activeClass + ' onclick="changePage(' + i + ')">' + i + '</button>';
-    }
-
-    if (currentPage < totalPages) {
-      container.innerHTML += '<button onclick="changePage(' + (currentPage + 1) + ')">Вперёд &#8594;</button>';
-    }
-  }
-
-  function changePage(page) {
-    currentPage = page;
-    renderPage();
-    window.scrollTo({ top: document.querySelector('.main').offsetTop - 80, behavior: 'smooth' });
-  }
-
-  function resetFilters() {
-    document.getElementById('filter-year').value = '';
-    document.getElementById('filter-discipline').value = '';
-    document.getElementById('filter-age').value = '';
-    document.getElementById('filter-event').value = '';
-    document.getElementById('filter-athlete').value = '';
-    currentAthleteQuery = '';
-    applyFilters();
-  }
-
-  function buildTable(group, rows, columns) {
-    if (!columns || columns.length === 0) {
-      columns = DEFAULT_COLUMNS;
-    }
-
-    var html = '<div class="table-wrapper"><h4>' + group + '</h4><table>';
-    
-    html += '<thead><tr>';
-    columns.forEach(function(col) {
-      html += '<th>' + (col.label || col.key) + '</th>';
-    });
-    html += '</tr></thead><tbody>';
-
-    if (rows) {
-      rows.forEach(function(r) {
-        html += '<tr>';
-        columns.forEach(function(col) {
-          var val = r[col.key];
-          if (val === undefined || val === null || val === '') {
-            val = '-';
-          }
-          if (col.key === 't') {
-            html += '<td><strong>' + val + '</strong></td>';
-          } else {
-            html += '<td>' + val + '</td>';
-          }
-        });
-        html += '</tr>';
-      });
-    }
-    html += '</tbody></table></div>';
-    return html;
-  }
-
-  function openModal(key) {
-    var data = allEvents.find(function(e) { return e.key === key; });
-    if (!data) return;
-
-    document.getElementById('modalTitle').textContent = data.title + (data.subtitle ? ' — ' + data.subtitle : '');
-
-    var bodyHtml = '';
-    if (data.tables) {
-      data.tables.forEach(function(t) {
-        bodyHtml += buildTable(t.group, t.rows, t.columns);
-      });
-    }
-    document.getElementById('modalBody').innerHTML = bodyHtml;
-
-    if (currentAthleteQuery) {
-      var rows = document.querySelectorAll('#modalBody tbody tr');
-      var firstMatch = null;
-      
-      var nameColIndex = 1;
-      var firstTable = data.tables && data.tables[0];
-      if (firstTable && firstTable.columns) {
-        for (var ci = 0; ci < firstTable.columns.length; ci++) {
-          if (firstTable.columns[ci].key === 'n') {
-            nameColIndex = ci;
-            break;
-          }
-        }
-      } else {
-        nameColIndex = 1;
-      }
-
-      rows.forEach(function(row) {
-        var nameCell = row.children[nameColIndex];
-        if (nameCell && matchAthlete(currentAthleteQuery, nameCell.textContent)) {
-          row.classList.add('athlete-highlight');
-          nameCell.classList.add('name-col');
-          if (!firstMatch) firstMatch = row;
-        }
-      });
-      if (firstMatch) {
-        setTimeout(function() {
-          firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-      }
-    }
-
-    document.getElementById('previewModal').style.display = 'flex';
-  }
-
-  function closeModal() {
-    document.getElementById('previewModal').style.display = 'none';
-  }
-
-  window.onclick = function(event) {
-    var modal = document.getElementById('previewModal');
-    if (modal && event.target == modal) { modal.style.display = 'none'; }
-  }
-
-  function toggleMobileMenu() {
-    document.getElementById('mobileDropdown').classList.toggle('active');
-  }
-
-  document.addEventListener('click', function(e) {
-    var dropdown = document.getElementById('mobileDropdown');
-    var btn = document.getElementById('mobileMenuBtn');
-    if (!dropdown || !btn) return;
-    if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
-      dropdown.classList.remove('active');
-    }
+  document.querySelectorAll('#modalBody .table-wrapper').forEach(function(el) {
+    attachCopyProtection(el);
   });
 
-  loadData();
+  if (currentAthleteQuery) {
+    var rows = document.querySelectorAll('#modalBody tbody tr');
+    var firstMatch = null, nameColIndex = 1;
+    var firstTable = tables;
+    if (firstTable && firstTable.columns) {
+      for (var ci = 0; ci < firstTable.columns.length; ci++) {
+        if (firstTable.columns[ci].key === 'n') { nameColIndex = ci; break; }
+      }
+    }
+    rows.forEach(function(row) {
+      var nameCell = row.children[nameColIndex];
+      if (nameCell && matchAthlete(currentAthleteQuery, nameCell.textContent)) {
+        row.classList.add('athlete-highlight');
+        nameCell.classList.add('name-col');
+        if (!firstMatch) firstMatch = row;
+      }
+    });
+    if (firstMatch) setTimeout(function() { firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+  }
+}
+
+function closeModal() {
+document.getElementById('previewModal').style.display = 'none';
+}
+
+function toggleMobileMenu() {
+document.getElementById('mobileDropdown').classList.toggle('active');
+}
+
+function initDropdowns() {
+document.querySelectorAll('.dropbtn').forEach(function(button) {
+button.addEventListener('click', function(e) {
+e.stopPropagation();
+var dropdown = button.parentElement;
+var isOpen = dropdown.classList.contains('show');
+document.querySelectorAll('.dropdown.show').forEach(function(d) {
+d.classList.remove('show');
+var b = d.querySelector('.dropbtn');
+if (b) b.setAttribute('aria-expanded', 'false');
+});
+if (!isOpen) {
+dropdown.classList.add('show');
+button.setAttribute('aria-expanded', 'true');
+}
+});
+});
+document.addEventListener('click', function(e) {
+document.querySelectorAll('.dropdown.show').forEach(function(dropdown) {
+if (!dropdown.contains(e.target)) {
+dropdown.classList.remove('show');
+var btn = dropdown.querySelector('.dropbtn');
+if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+});
+});
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+var themeBtn = document.getElementById('themeToggle');
+if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+
+['filter-year', 'filter-discipline', 'filter-age', 'filter-event'].forEach(function(id) {
+var el = document.getElementById(id);
+if (el) el.addEventListener('change', applyFilters);
+});
+
+var athleteInput = document.getElementById('filter-athlete');
+if (athleteInput) athleteInput.addEventListener('input', applyFiltersDebounced);
+
+var resetBtn = document.getElementById('btnReset');
+if (resetBtn) resetBtn.addEventListener('click', resetFilters);
+
+var mobileBtn = document.getElementById('mobileMenuBtn');
+if (mobileBtn) mobileBtn.addEventListener('click', toggleMobileMenu);
+document.addEventListener('click', function(e) {
+var dropdown = document.getElementById('mobileDropdown');
+var btn = document.getElementById('mobileMenuBtn');
+if (!dropdown || !btn) return;
+if (!btn.contains(e.target) && !dropdown.contains(e.target)) dropdown.classList.remove('active');
+});
+
+document.addEventListener('click', function(e) {
+var link = e.target.closest('[data-key]');
+if (link) {
+e.preventDefault();
+openModal(link.getAttribute('data-key'));
+}
+});
+
+var closeBtn = document.getElementById('closeModalBtn');
+if (closeBtn) closeBtn.addEventListener('click', closeModal);
+window.addEventListener('click', function(event) {
+var modal = document.getElementById('previewModal');
+if (modal && event.target === modal) modal.style.display = 'none';
+});
+
+initDropdowns();
+loadData();
+});
+
+})();
 </script>
 </body>
 </html>
